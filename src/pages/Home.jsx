@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -6,11 +6,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { motion } from 'framer-motion'
 import LightRays from '../components/LightRays'
 import LogoLoop from '../components/LogoLoop'
-import CurvedLoop from '../components/CurvedLoop'
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript, SiNodedotjs, SiGit, SiGithub } from 'react-icons/si'
 
 import { fetchGitHubRepos } from '../utils/github'
-import portfolioNoBgImage from '../assets/images/portfolioimg-removebg-preview.png'
+import portfolioNoBgImage from '../assets/images/relightportfolio-removebg.png'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -21,18 +20,8 @@ const fadeInUp = {
   transition: { duration: 0.6, ease: "easeOut" }
 }
 
-const staggerContainer = {
-  initial: {},
-  animate: {
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-}
-
 const cardHover = {
-  scale: 1.02,
-  y: -4,
+  scale: 1.05,
   transition: { duration: 0.2, ease: "easeOut" }
 }
 
@@ -364,8 +353,21 @@ const Home = () => {
 
   return (
     <>
+      <style>{`
+        @media (max-width: 1023px) {
+          .hero-section-mobile {
+            padding-top: 10% !important;
+          }
+          .hero-content-mobile {
+            margin-top: 15% !important;
+          }
+        }
+      `}</style>
       {/* Hero Section */}
-      <section className="hero-section  min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-0 relative overflow-hidden bg-black" style={{ backgroundImage: 'none' }}>
+      <section 
+        className="hero-section hero-section-mobile min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-40 sm:pt-52 md:pt-64 lg:py-0 pb-0 relative overflow-hidden bg-black" 
+        style={{ backgroundImage: 'none' }}
+      >
         <div className="absolute inset-0 z-0">
           <LightRays
             raysOrigin="top-center"
@@ -383,7 +385,9 @@ const Home = () => {
         <div className="max-w-7xl mx-auto w-full relative z-10 px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
             {/* Hero Content */}
-            <div className=" text-center lg:text-left">
+            <div 
+              className="text-center lg:text-left hero-content-mobile mt-16 sm:mt-20 md:mt-24 lg:mt-[10%] xl:mt-[-4%]"
+            >
               <motion.div
                 className="fade-in"
                 ref={el => fadeInRefs.current[0] = el}
@@ -433,9 +437,9 @@ const Home = () => {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <Link to="/contact" className="btn-secondary inline-flex items-center justify-center">
-                    Get In Touch
+                    HIRE ME NOW
                     <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   </Link>
                 </div>
@@ -444,13 +448,13 @@ const Home = () => {
 
             {/* Hero Image */}
 
-            <div className="flex-1 max-w-xs lg:max-w-md">
-              <div className="relative hero-image-container">
+            <div className="flex-1 max-w-xs lg:max-w-md" style={{ marginTop: '-4%' }}>
+              <div className="relative hero-image-container hero-image-filter">
                 {/* Main Image */}
                 <img
                   src={portfolioNoBgImage}
                   alt="Ali Youssef - Frontend Developer"
-                  className="relative z-10 w-full h-auto rounded-2xl object-contain hero-image-filter"
+                  className="relative z-10 w-full h-auto rounded-2xl object-contain"
                   style={{
                     transform: 'scale(0.7)',
                     transformOrigin: 'center',
@@ -477,9 +481,7 @@ const Home = () => {
                         <span className="hero-code-keyword">const</span>{' '}
                         <span className="hero-code-variable">developer</span> = {'{'}
                       </div>
-                      <div className="hero-code-line">
-                        &nbsp;&nbsp;<span className="hero-code-property">name</span>: <span className="hero-code-string">'Ali Youssef'</span>,
-                      </div>
+                     
                       <div className="hero-code-line">
                         &nbsp;&nbsp;<span className="hero-code-property">nationality</span>: <span className="hero-code-string">'Lebanese'</span>,
                       </div>
@@ -556,95 +558,94 @@ const Home = () => {
         </div>
       </motion.section>
 
-      {/* Featured Skills */}
+      {/* Certifications & Achievements */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 core-technologies-section">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-12">
             <h3 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4 fade-in" ref={el => fadeInRefs.current[3] = el}>
-              Core Technologies
+              Certifications & Achievements
             </h3>
             <p className="text-lg text-text-secondary fade-in" ref={el => fadeInRefs.current[4] = el}>
-              Technologies I work with to bring ideas to life
+              Professional certifications and learning achievements
             </p>
           </div>
 
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-6"
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true, amount: 0.2 }}
-          >
-            {/* React */}
-            <motion.div
-              className="card p-6 text-center transition-transform duration-200"
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <motion.div 
+              className="card p-6 text-center certificate-card" 
               ref={el => cardRefs.current[0] = el}
-              variants={fadeInUp}
+              initial={{ x: -100, opacity: 1 }}
+              whileInView={{ x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
               whileHover={cardHover}
             >
               <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-xl flex items-center justify-center">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" alt="React" className="w-10 h-10" />
+                <svg className="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.514 0 10 4.486 10 10s-4.486 10-10 10S2 17.514 2 12 6.486 2 12 2zm0 2c-4.411 0-8 3.589-8 8s3.589 8 8 8 8-3.589 8-8-3.589-8-8-8z"/>
+                </svg>
               </div>
-              <h4 className="text-lg font-semibold text-text-primary mb-2">React</h4>
-              <p className="text-sm text-text-secondary">Component-based UI library</p>
+              <h3 className="text-lg font-semibold text-text-primary mb-2">Responsive Web Design</h3>
+              <p className="text-sm text-text-secondary mb-3">FreeCodeCamp</p>
+              <div className="flex items-center justify-center mb-4">
+                <svg className="w-4 h-4 text-success mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                </svg>
+                <span className="text-sm text-success">Verified</span>
+              </div>
+              <a href="#" className="text-primary hover:text-primary-600 text-sm transition-colors duration-200">View Certificate</a>
             </motion.div>
 
-            {/* JavaScript */}
-            <motion.div
-              className="card p-6 text-center transition-transform duration-200"
+            <motion.div 
+              className="card p-6 text-center certificate-card" 
               ref={el => cardRefs.current[1] = el}
-              variants={fadeInUp}
+              initial={{ x: -100, opacity: 1 }}
+              whileInView={{ x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
               whileHover={cardHover}
             >
               <div className="w-16 h-16 mx-auto mb-4 bg-warning/10 rounded-xl flex items-center justify-center">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" alt="JavaScript" className="w-10 h-10" />
+                <svg className="w-8 h-8 text-warning" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.514 0 10 4.486 10 10s-4.486 10-10 10S2 17.514 2 12 6.486 2 12 2zm0 2c-4.411 0-8 3.589-8 8s3.589 8 8 8 8-3.589 8-8-3.589-8-8-8z"/>
+                </svg>
               </div>
-              <h4 className="text-lg font-semibold text-text-primary mb-2">JavaScript</h4>
-              <p className="text-sm text-text-secondary">Modern ES6+ development</p>
+              <h3 className="text-lg font-semibold text-text-primary mb-2">JavaScript Algorithms</h3>
+              <p className="text-sm text-text-secondary mb-3">FreeCodeCamp</p>
+              <div className="flex items-center justify-center mb-4">
+                <svg className="w-4 h-4 text-success mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                </svg>
+                <span className="text-sm text-success">Verified</span>
+              </div>
+              <a href="#" className="text-primary hover:text-primary-600 text-sm transition-colors duration-200">View Certificate</a>
             </motion.div>
 
-            {/* CSS3 */}
-            <motion.div
-              className="card p-6 text-center transition-transform duration-200"
+            <motion.div 
+              className="card p-6 text-center certificate-card" 
               ref={el => cardRefs.current[2] = el}
-              variants={fadeInUp}
+              initial={{ x: -100, opacity: 1 }}
+              whileInView={{ x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
               whileHover={cardHover}
             >
               <div className="w-16 h-16 mx-auto mb-4 bg-secondary/10 rounded-xl flex items-center justify-center">
-                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" alt="CSS3" className="w-10 h-10" />
+                <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2L13.09 8.26L20 9L13.09 15.74L12 22L10.91 15.74L4 9L10.91 8.26L12 2Z" fill="#FF6C47"/>
+                </svg>
               </div>
-              <h4 className="text-lg font-semibold text-text-primary mb-2">CSS3</h4>
-              <p className="text-sm text-text-secondary">Advanced styling & animations</p>
-            </motion.div>
-
-            {/* Tailwind CSS */}
-            <motion.div
-              className="card p-6 text-center transition-transform duration-200"
-              ref={el => cardRefs.current[3] = el}
-              variants={fadeInUp}
-              whileHover={cardHover}
-            >
-              <div className="w-16 h-16 mx-auto mb-4 bg-accent/10 rounded-xl flex items-center justify-center">
-                <img src="https://api.iconify.design/devicon:tailwindcss.svg" alt="Tailwind CSS" className="w-10 h-10" />
+              <h3 className="text-lg font-semibold text-text-primary mb-2">Learn React</h3>
+              <p className="text-sm text-text-secondary mb-3">Scrimba</p>
+              <div className="flex items-center justify-center mb-4">
+                <svg className="w-4 h-4 text-success mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                </svg>
+                <span className="text-sm text-success">Verified</span>
               </div>
-              <h4 className="text-lg font-semibold text-text-primary mb-2">Tailwind</h4>
-              <p className="text-sm text-text-secondary">Utility-first CSS framework</p>
+              <a href="#" className="text-primary hover:text-primary-600 text-sm transition-colors duration-200">View Certificate</a>
             </motion.div>
-          </motion.div>
-          
-          {/* Curved Loop at bottom center
-          <div className="mt-16 sm:mt-20 lg:mt-24 flex justify-center items-center">
-            <div className="w-full max-w-7xl mx-auto">
-              <CurvedLoop 
-                marqueeText="YOUR VISION ✦ MY CODE ✦"
-                speed={2}
-                curveAmount={300}
-                direction="left"
-                interactive={true}
-                className="!text-yellow-400"
-              />
-            </div>
-          </div>*/}
+          </div>
         </div>
       </section>
 

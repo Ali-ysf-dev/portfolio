@@ -161,6 +161,7 @@
 
 html,
 :host {
+  zoom: 1;
   line-height: 1.5;
   /* 1 */
   -webkit-text-size-adjust: 100%;
@@ -646,6 +647,10 @@ textarea {
   background-color: var(--color-surface-hover);
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
+}
+
+.certificate-card:hover {
+  transform: scale(1.05);
 }
 
 .btn-primary {
@@ -2659,9 +2664,9 @@ textarea {
 
 /* Hero Image Filter to merge with background */
 .hero-image-filter {
-  filter: brightness(0.85) contrast(1.1) saturate(0.9);
+  filter: brightness(1.1) contrast(1) saturate(1);
   mix-blend-mode: normal;
-  opacity: 0.95;
+  opacity: 1;
 }
 
 /* Modern Project Cards */
