@@ -714,7 +714,9 @@ const About = () => {
                 <p className="text-text-secondary mb-6 text-sm">
                   Download my complete resume with detailed experience, education, and project information.
                 </p>
-                <motion.button 
+                <motion.a 
+                  href="https://res.cloudinary.com/ddlkcigaz/image/upload/fl_attachment/v1768830408/Ali_Youssef_Lebenslauf_1_escjjl.pdf"
+                  download
                   className="btn-primary w-full flex items-center justify-center"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -722,8 +724,8 @@ const About = () => {
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                   </svg>
-                  Download Resume
-                </motion.button>
+                  Download My CV
+                </motion.a>
               </motion.div>
             </div>
           </div>

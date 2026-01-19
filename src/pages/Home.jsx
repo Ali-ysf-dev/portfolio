@@ -33,10 +33,20 @@ const Home = () => {
   const fadeInRefs = useRef([])
   const cardRefs = useRef([])
   const projectCardRefs = useRef([])
+  const statsRefs = useRef([])
+  const statsAnimated = useRef(false)
+  const statsSectionRef = useRef(null)
 
   // State for GitHub projects
   const [githubProjects, setGithubProjects] = useState([])
   const [loadingProjects, setLoadingProjects] = useState(true)
+
+  // State for statistics
+  const [stats, setStats] = useState({
+    projects: 0,
+    experience: 0,
+    satisfaction: 0
+  })
 
   // Fetch GitHub projects on component mount
   useEffect(() => {
@@ -53,6 +63,74 @@ const Home = () => {
     }
 
     loadGitHubProjects()
+  }, [])
+
+  // Statistics stepper animation
+  useEffect(() => {
+    if (!statsSectionRef.current || statsAnimated.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !statsAnimated.current) {
+            statsAnimated.current = true
+
+            // Animate statistics with stepper effect
+            const statsValues = {
+              projects: 15,
+              experience: 2,
+              satisfaction: 95
+            }
+
+            // Animate projects
+            gsap.to({ value: 0 }, {
+              value: statsValues.projects,
+              duration: 2,
+              ease: "power2.out",
+              onUpdate: function () {
+                setStats(prev => ({ ...prev, projects: Math.floor(this.targets()[0].value) }))
+              }
+            })
+
+            // Animate experience
+            gsap.to({ value: 0 }, {
+              value: statsValues.experience,
+              duration: 2,
+              ease: "power2.out",
+              delay: 0.2,
+              onUpdate: function () {
+                setStats(prev => ({ ...prev, experience: Math.floor(this.targets()[0].value) }))
+              }
+            })
+
+            // Animate satisfaction
+            gsap.to({ value: 0 }, {
+              value: statsValues.satisfaction,
+              duration: 2,
+              ease: "power2.out",
+              delay: 0.4,
+              onUpdate: function () {
+                setStats(prev => ({ ...prev, satisfaction: Math.floor(this.targets()[0].value) }))
+              }
+            })
+
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.3 }
+    )
+
+    const currentSection = statsSectionRef.current
+    if (currentSection) {
+      observer.observe(currentSection)
+    }
+
+    return () => {
+      if (currentSection) {
+        observer.unobserve(currentSection)
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -218,24 +296,27 @@ const Home = () => {
           if (card) {
             gsap.set(card, { opacity: 0, y: 30 })
 
-            const handleMouseEnter = () => {
-              gsap.to(card, {
-                y: -4,
-                scale: 1.02,
-                duration: 0.2,
-                ease: "power2.out"
-              })
+            // Skip GSAP hover effects for certificate cards (they use Framer Motion hover)
+            if (!card.classList.contains('certificate-card')) {
+              const handleMouseEnter = () => {
+                gsap.to(card, {
+                  y: -4,
+                  scale: 1.02,
+                  duration: 0.2,
+                  ease: "power2.out"
+                })
+              }
+              const handleMouseLeave = () => {
+                gsap.to(card, {
+                  y: 0,
+                  scale: 1,
+                  duration: 0.2,
+                  ease: "power2.out"
+                })
+              }
+              card.addEventListener('mouseenter', handleMouseEnter)
+              card.addEventListener('mouseleave', handleMouseLeave)
             }
-            const handleMouseLeave = () => {
-              gsap.to(card, {
-                y: 0,
-                scale: 1,
-                duration: 0.2,
-                ease: "power2.out"
-              })
-            }
-            card.addEventListener('mouseenter', handleMouseEnter)
-            card.addEventListener('mouseleave', handleMouseLeave)
             cardObserver.observe(card)
           }
         })
@@ -368,7 +449,7 @@ const Home = () => {
         className="hero-section hero-section-mobile min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-40 sm:pt-52 md:pt-64 lg:py-0 pb-0 relative overflow-hidden bg-black" 
         style={{ backgroundImage: 'none' }}
       >
-        <div className="absolute inset-0 z-0">
+        <div className="fixed inset-0 z-0" style={{ top: 0, height: '100vh' }}>
           <LightRays
             raysOrigin="top-center"
             raysColor="#00ffff"
@@ -510,7 +591,7 @@ const Home = () => {
                 { node: <SiNextdotjs />, title: "Next.js", href: "https://nextjs.org" },
                 { node: <SiNodedotjs />, title: "Node.js", href: "https://nodejs.org" },
                 { node: <SiGit />, title: "Git", href: "https://git-scm.com" },
-                { node: <SiGithub />, title: "GitHub", href: "https://github.com" },
+                { node: <SiGithub />, title: "GitHub", href: "https://github.com/Ali-ysf-dev" },
               ]}
               speed={80}
               direction="left"
@@ -529,7 +610,7 @@ const Home = () => {
 
       {/* Brief Introduction */}
       <motion.section
-        className="py-16 px-4 sm:px-6 lg:px-8 section-bg-custom"
+        className="py-16 px-4 sm:px-6 lg:px-8 bg-black"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, amount: 0.3 }}
@@ -555,11 +636,56 @@ const Home = () => {
             responsive, accessible, and performant web applications. I'm passionate about
             modern web technologies and always eager to learn new tools and frameworks.
           </motion.p>
+
+          {/* Statistics Section */}
+          <div ref={statsSectionRef} className="mt-12 flex flex-wrap justify-center items-center gap-8 sm:gap-12">
+            {/* Projects Completed */}
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <div className="text-2xl sm:text-3xl font-bold" style={{ color: '#FCA311' }}>
+                <span ref={el => statsRefs.current[0] = el}>{stats.projects}</span>+
+              </div>
+              <div className="text-sm text-text-secondary">Projects Completed</div>
+            </motion.div>
+
+            {/* Years of Experience */}
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <div className="text-2xl sm:text-3xl font-bold" style={{ color: '#FCA311' }}>
+                <span ref={el => statsRefs.current[1] = el}>{stats.experience}</span>+
+              </div>
+              <div className="text-sm text-text-secondary">Years of Experience</div>
+            </motion.div>
+
+            {/* Client Satisfaction */}
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+            >
+              <div className="text-2xl sm:text-3xl font-bold" style={{ color: '#FCA311' }}>
+                <span ref={el => statsRefs.current[2] = el}>{stats.satisfaction}</span>%
+              </div>
+              <div className="text-sm text-text-secondary">Client Satisfaction</div>
+            </motion.div>
+          </div>
         </div>
       </motion.section>
 
       {/* Certifications & Achievements */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 core-technologies-section">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 core-technologies-section bg-black">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-12">
             <h3 className="text-2xl sm:text-3xl font-bold text-text-primary mb-4 fade-in" ref={el => fadeInRefs.current[3] = el}>
@@ -646,11 +772,27 @@ const Home = () => {
               <a href="#" className="text-primary hover:text-primary-600 text-sm transition-colors duration-200">View Certificate</a>
             </motion.div>
           </div>
+
+          {/* Download CV Button */}
+          <div className="mt-12 flex justify-center">
+            <motion.a 
+              href="https://res.cloudinary.com/ddlkcigaz/image/upload/fl_attachment/v1768830408/Ali_Youssef_Lebenslauf_1_escjjl.pdf"
+              download
+              className="btn-primary inline-flex items-center justify-center"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              Download My CV
+            </motion.a>
+          </div>
         </div>
       </section>
 
       {/* Featured Projects */}
-      <section className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-primary/20">
+      <section className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-black">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-8 sm:mb-10">
             <h3
@@ -764,7 +906,7 @@ const Home = () => {
       </section>
 
       {/* Contact CTA */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 lets-work-together-section">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 lets-work-together-section bg-black">
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h3
             className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 fade-in"

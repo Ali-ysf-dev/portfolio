@@ -595,7 +595,7 @@ const Contact = () => {
 
                     {/* GitHub */}
                     <a 
-                      href="https://github.com/aliyoussef" 
+                      href="https://github.com/Ali-ysf-dev" 
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className="flex items-center p-3 rounded-lg hover:bg-surface-hover transition-colors duration-200 group"

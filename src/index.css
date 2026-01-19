@@ -650,7 +650,8 @@ textarea {
 }
 
 .certificate-card:hover {
-  transform: scale(1.05);
+  transform: scale(1.05) !important;
+  transform-origin: center;
 }
 
 .btn-primary {
