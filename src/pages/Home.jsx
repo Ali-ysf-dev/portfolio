@@ -6,10 +6,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { motion } from 'framer-motion'
 import LightRays from '../components/LightRays'
 import LogoLoop from '../components/LogoLoop'
+import FlowingMenu from '../components/FlowingMenu'
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript, SiNodedotjs, SiGit, SiGithub } from 'react-icons/si'
 
-import { fetchGitHubRepos } from '../utils/github'
+// import { fetchGitHubRepos } from '../utils/github'
 import portfolioNoBgImage from '../assets/images/relightportfolio-removebg.png'
+import { fetchGitHubRepos } from '../utils/github'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -37,9 +39,15 @@ const Home = () => {
   const statsAnimated = useRef(false)
   const statsSectionRef = useRef(null)
 
-  // State for GitHub projects
-  const [githubProjects, setGithubProjects] = useState([])
-  const [loadingProjects, setLoadingProjects] = useState(true)
+  const flowingMenuItems = [
+    { link: 'https://www.aliyoussef.tech/skills', text: 'Frontend Skills', image: 'https://picsum.photos/600/400?random=1' },
+    { link: 'https://www.aliyoussef.tech/skills', text: 'Backend Skills', image: 'https://picsum.photos/600/400?random=2' },
+    { link: 'https://www.aliyoussef.tech/skills', text: 'Tools', image: 'https://picsum.photos/600/400?random=3' },
+  ]
+
+  // State for GitHub projects (currently not used on Home page)
+   const [githubProjects, setGithubProjects] = useState([])
+   const [loadingProjects, setLoadingProjects] = useState(true)
 
   // State for statistics
   const [stats, setStats] = useState({
@@ -48,22 +56,22 @@ const Home = () => {
     satisfaction: 0
   })
 
-  // Fetch GitHub projects on component mount
-  useEffect(() => {
-    const loadGitHubProjects = async () => {
-      setLoadingProjects(true)
-      try {
-        const repos = await fetchGitHubRepos(8, 'updated') // Fetch 8 most recently updated repos
-        setGithubProjects(repos)
-      } catch (error) {
-        console.error('Failed to load GitHub projects:', error)
-      } finally {
-        setLoadingProjects(false)
-      }
-    }
-
-    loadGitHubProjects()
-  }, [])
+  // Fetch GitHub projects on component mount (disabled for now on Home page)
+   useEffect(() => {
+     const loadGitHubProjects = async () => {
+       setLoadingProjects(true)
+       try {
+         const repos = await fetchGitHubRepos(8, 'updated') // Fetch 8 most recently updated repos
+         setGithubProjects(repos)
+       } catch (error) {
+         console.error('Failed to load GitHub projects:', error)
+       } finally {
+         setLoadingProjects(false)
+       }
+     }
+  
+     loadGitHubProjects()
+   }, [])
 
   // Statistics stepper animation
   useEffect(() => {
@@ -443,13 +451,16 @@ const Home = () => {
             margin-top: 15% !important;
           }
         }
+        .crafting-digital-section {
+          background-color: transparent !important;
+        }
       `}</style>
       {/* Hero Section */}
       <section 
         className="hero-section hero-section-mobile min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-40 sm:pt-52 md:pt-64 lg:py-0 pb-0 relative overflow-hidden bg-black" 
         style={{ backgroundImage: 'none' }}
       >
-        <div className="fixed inset-0 z-0" style={{ top: 0, height: '100vh' }}>
+        <div className="absolute inset-0 z-0" style={{ top: 0, height: '100vh' }}>
           <LightRays
             raysOrigin="top-center"
             raysColor="#00ffff"
@@ -477,7 +488,7 @@ const Home = () => {
                 transition={{ duration: 0.8, delay: 0.3 }}
               >
                 <motion.h1
-                  className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text-primary mb-6"
+                  className="text-4xl sm:text-5xl lg:text-6xl font-bold text-text-primary mb-6 "
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
@@ -485,7 +496,7 @@ const Home = () => {
                   Hi, I'm <span className="text-gradient" ref={heroTitleRef}>Ali Youssef</span>
                 </motion.h1>
                 <motion.h2
-                  className="text-xl sm:text-2xl lg:text-3xl text-text-secondary mb-8 font-medium"
+                  className="text-xl sm:text-2xl lg:text-3xl text-text-secondary mb-8 font-medium font-circuit-forem"
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.5 }}
@@ -493,7 +504,7 @@ const Home = () => {
                   Frontend React Developer
                 </motion.h2>
                 <motion.p
-                  className="text-lg text-text-secondary mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
+                  className="text-lg text-text-secondary mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed "
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.6 }}
@@ -610,13 +621,14 @@ const Home = () => {
 
       {/* Brief Introduction */}
       <motion.section
-        className="py-16 px-4 sm:px-6 lg:px-8 bg-black"
+        className="py-16 px-4 sm:px-6 lg:px-8 crafting-digital-section"
+        style={{ backgroundColor: 'transparent' }}
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-4xl mx-auto text-center" >
           <motion.h3
             className="text-2xl sm:text-3xl font-bold text-text-primary mb-6 fade-in"
             ref={el => { if (el && !fadeInRefs.current.includes(el)) fadeInRefs.current.push(el) }}
@@ -791,6 +803,40 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Flowing Menu Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-black">
+        <div className="max-w-7xl mx-auto">
+          <motion.h3
+            className="text-2xl sm:text-3xl font-bold text-text-primary mb-2 text-center fade-in"
+            ref={el => { if (el && !fadeInRefs.current.includes(el)) fadeInRefs.current.push(el) }}
+            {...fadeInUp}
+            viewport={{ once: true }}
+          >
+            Core Skills & Professional Expertise
+          </motion.h3>
+          <motion.p
+            className="text-base sm:text-lg text-text-secondary mb-8 text-center max-w-2xl mx-auto fade-in"
+            ref={el => { if (el && !fadeInRefs.current.includes(el)) fadeInRefs.current.push(el) }}
+            {...fadeInUp}
+            viewport={{ once: true }}
+            transition={{ delay: 0.1 }}
+          >
+            A curated overview of my primary front-end technologies, tools, and frameworks that I use to build modern, high‑quality web experiences.
+          </motion.p>
+          <div style={{ height: '250px', position: 'relative' }}>
+            <FlowingMenu
+              items={flowingMenuItems}
+              speed={15}
+              textColor="#ffffff"
+              bgColor="transparent"
+              marqueeBgColor="black"
+              marqueeTextColor="#060010"
+              borderColor="#ffffff"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Featured Projects */}
       <section className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-black">
         <div className="max-w-7xl mx-auto relative z-10">
@@ -901,7 +947,6 @@ const Home = () => {
               ))}
             </div>
           )}
-
         </div>
       </section>
 
@@ -934,6 +979,8 @@ const Home = () => {
               </a>
             </motion.div>
           </div>
+
+          
 
           {/* Social Links */}
           <div
@@ -976,6 +1023,8 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      
     </>
   )
 }

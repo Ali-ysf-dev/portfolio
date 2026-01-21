@@ -303,7 +303,7 @@ const Contact = () => {
     <div className="contact-page-background">
       {/* Page Header */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 section-bg-custom">
-        <div className="max-w-7xl mx-auto text-center">
+        <div className="max-w-7xl mx-auto text-center relative z-10">
           <div className="fade-in" ref={el => fadeInRefs.current[0] = el}>
             <h1 className="text-4xl sm:text-5xl font-bold text-text-primary mb-6">
               Get In <span className="text-gradient">Touch</span>

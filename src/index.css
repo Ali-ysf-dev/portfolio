@@ -11,6 +11,15 @@
   font-display: swap;
 }
 
+/* Circuit Forem Font */
+@font-face {
+  font-family: 'Circuit Forem';
+  src: url('/fonts/circuit-forem.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 *,
 ::before,
 ::after {
@@ -581,6 +590,12 @@ body {
   background-color: var(--color-background);
   color: var(--color-text-primary);
   transition: background-color 300ms ease-out, color 300ms ease-out;
+}
+
+/* Custom font utility for hero subtitle */
+.font-circuit-forem {
+  font-family: 'Circuit Forem', 'Poppins', sans-serif;
+  letter-spacing: 0.08em;
 }
 
 /* Touch targets minimum 44px */
