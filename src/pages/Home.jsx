@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -718,13 +718,19 @@ const Home = () => {
               transition={{ duration: 0.6, ease: "easeOut" }}
               whileHover={cardHover}
             >
-              <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-xl flex items-center justify-center">
-                <svg className="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.514 0 10 4.486 10 10s-4.486 10-10 10S2 17.514 2 12 6.486 2 12 2zm0 2c-4.411 0-8 3.589-8 8s3.589 8 8 8 8-3.589 8-8-3.589-8-8-8z"/>
-                </svg>
+              <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-xl flex items-center justify-center overflow-hidden">
+                <img 
+                  src="http://fseg.ul.edu.lb/images/logo.png" 
+                  alt="Lebanese University Logo" 
+                  className="w-full h-full object-contain p-2"
+                  onError={(e) => {
+                    e.target.style.display = 'none'
+                    e.target.parentElement.innerHTML = '<svg className="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.514 0 10 4.486 10 10s-4.486 10-10 10S2 17.514 2 12 6.486 2 12 2zm0 2c-4.411 0-8 3.589-8 8s3.589 8 8 8 8-3.589 8-8-3.589-8-8-8z"/></svg>'
+                  }}
+                />
               </div>
-              <h3 className="text-lg font-semibold text-text-primary mb-2">Responsive Web Design</h3>
-              <p className="text-sm text-text-secondary mb-3">FreeCodeCamp</p>
+              <h3 className="text-lg font-semibold text-text-primary mb-2">Management Information System</h3>
+              <p className="text-sm text-text-secondary mb-3">Lebanese University</p>
               <div className="flex items-center justify-center mb-4">
                 <svg className="w-4 h-4 text-success mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
@@ -743,13 +749,19 @@ const Home = () => {
               transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
               whileHover={cardHover}
             >
-              <div className="w-16 h-16 mx-auto mb-4 bg-warning/10 rounded-xl flex items-center justify-center">
-                <svg className="w-8 h-8 text-warning" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.514 0 10 4.486 10 10s-4.486 10-10 10S2 17.514 2 12 6.486 2 12 2zm0 2c-4.411 0-8 3.589-8 8s3.589 8 8 8 8-3.589 8-8-3.589-8-8-8z"/>
-                </svg>
+              <div className="w-16 h-16 mx-auto mb-4 bg-warning/10 rounded-xl flex items-center justify-center overflow-hidden">
+                <img 
+                  src="https://images.credly.com/images/00634f82-b07f-4bbd-a6bb-53de397fc3a6/image.png" 
+                  alt="AWS Logo" 
+                  className="w-full h-full object-contain p-2"
+                  onError={(e) => {
+                    e.target.style.display = 'none'
+                    e.target.parentElement.innerHTML = '<svg className="w-8 h-8 text-warning" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.514 0 10 4.486 10 10s-4.486 10-10 10S2 17.514 2 12 6.486 2 12 2zm0 2c-4.411 0-8 3.589-8 8s3.589 8 8 8 8-3.589 8-8-3.589-8-8-8z"/></svg>'
+                  }}
+                />
               </div>
-              <h3 className="text-lg font-semibold text-text-primary mb-2">JavaScript Algorithms</h3>
-              <p className="text-sm text-text-secondary mb-3">FreeCodeCamp</p>
+              <h3 className="text-lg font-semibold text-text-primary mb-2">AWS Certified Cloud Practitioner</h3>
+              <p className="text-sm text-text-secondary mb-3">AWS</p>
               <div className="flex items-center justify-center mb-4">
                 <svg className="w-4 h-4 text-success mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
@@ -768,10 +780,16 @@ const Home = () => {
               transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
               whileHover={cardHover}
             >
-              <div className="w-16 h-16 mx-auto mb-4 bg-secondary/10 rounded-xl flex items-center justify-center">
-                <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L13.09 8.26L20 9L13.09 15.74L12 22L10.91 15.74L4 9L10.91 8.26L12 2Z" fill="#FF6C47"/>
-                </svg>
+              <div className="w-16 h-16 mx-auto mb-4 bg-secondary/10 rounded-xl flex items-center justify-center overflow-hidden">
+                <img 
+                  src="https://scrimba.com/assets/social-avatar.AK3RN3IF.jpg" 
+                  alt="Scrimba Logo" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none'
+                    e.target.parentElement.innerHTML = '<svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L13.09 8.26L20 9L13.09 15.74L12 22L10.91 15.74L4 9L10.91 8.26L12 2Z" fill="#FF6C47"/></svg>'
+                  }}
+                />
               </div>
               <h3 className="text-lg font-semibold text-text-primary mb-2">Learn React</h3>
               <p className="text-sm text-text-secondary mb-3">Scrimba</p>
