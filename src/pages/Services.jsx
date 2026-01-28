@@ -497,7 +497,7 @@ const Services = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/contact" className="btn-primary">Get Started Today</Link>
-              <Link to="/" className="btn-secondary">View My Work</Link>
+              <Link to="/#projects" className="btn-secondary">View My Work</Link>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import LightRays from '../components/LightRays'
 import LogoLoop from '../components/LogoLoop'
 import FlowingMenu from '../components/FlowingMenu'
+import SocialBottomBar from '../components/SocialBottomBar'
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript, SiNodedotjs, SiGit, SiGithub } from 'react-icons/si'
 
 // import { fetchGitHubRepos } from '../utils/github'
@@ -856,7 +857,7 @@ const Home = () => {
       </section>
 
       {/* Featured Projects */}
-      <section className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-black">
+      <section id="projects" className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-black">
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="text-center mb-8 sm:mb-10">
             <h3
@@ -1007,7 +1008,7 @@ const Home = () => {
           >
             <motion.a
               href="https://github.com/Ali-ysf-dev"
-              className="text-text-secondary hover:text-primary transition-colors duration-200"
+              className="hidden text-text-secondary hover:text-primary transition-colors duration-200"
               aria-label="GitHub"
               whileHover={{ scale: 1.2, y: -2 }}
               whileTap={{ scale: 0.9 }}
@@ -1018,7 +1019,7 @@ const Home = () => {
             </motion.a>
             <motion.a
               href="https://www.linkedin.com/in/ali-youssef-a49535346/"
-              className="text-text-secondary hover:text-primary transition-colors duration-200"
+              className="hidden text-text-secondary hover:text-primary transition-colors duration-200"
               aria-label="LinkedIn"
               whileHover={{ scale: 1.2, y: -2 }}
               whileTap={{ scale: 0.9 }}
@@ -1029,7 +1030,7 @@ const Home = () => {
             </motion.a>
             <motion.a
               href="https://twitter.com/aliyoussef"
-              className="text-text-secondary hover:text-primary transition-colors duration-200"
+              className="opacity-0 text-text-secondary hover:text-primary transition-colors duration-200"
               aria-label="Twitter"
               whileHover={{ scale: 1.2, y: -2 }}
               whileTap={{ scale: 0.9 }}
@@ -1042,7 +1043,7 @@ const Home = () => {
         </div>
       </section>
 
-      
+      <SocialBottomBar />
     </>
   )
 }

@@ -7,6 +7,16 @@ export default defineConfig({
   plugins: [
     react(),
     viteImagemin({
+      // Do not compress the hero image to keep its full resolution
+      filter: (source) => {
+        if (typeof source === 'string') {
+          // Skip any file whose path or name contains this hero image filename
+          if (source.includes('relightportfolio-removebg')) {
+            return false
+          }
+        }
+        return true
+      },
       gifsicle: {
         optimizationLevel: 7,
         interlaced: false,
