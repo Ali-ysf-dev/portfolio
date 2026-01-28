@@ -436,7 +436,7 @@ const Services = () => {
 
       {/* Development Process Section */}
       <motion.section 
-        className="py-16 px-4 sm:px-6 lg:px-8 section-bg-custom"
+        className="py-16 px-4 sm:px-6 lg:px-8 bg-black"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, amount: 0.3 }}
