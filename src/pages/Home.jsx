@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -11,7 +11,7 @@ import SocialBottomBar from '../components/SocialBottomBar'
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript, SiNodedotjs, SiGit, SiGithub } from 'react-icons/si'
 
 // import { fetchGitHubRepos } from '../utils/github'
-import portfolioNoBgImage from '../assets/images/relightportfolio-removebg.png'
+import portfolioNoBgImage from '../assets/images/relightportfolio-removebg.avif'
 import { fetchGitHubRepos } from '../utils/github'
 
 gsap.registerPlugin(ScrollTrigger)
