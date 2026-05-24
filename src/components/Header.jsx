@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { gsap } from 'gsap'
+import AnnouncementBanner from './AnnouncementBanner'
 
-const Header = () => {
+const Header = ({ showBanner = true }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [theme, setTheme] = useState('dark')
+  const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const navLinksRef = useRef([])
 
@@ -45,6 +47,14 @@ const Header = () => {
     }
   }, [])
 
+  // Add glass background once user scrolls past the banner
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 32)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   // Close mobile menu when route changes
   useEffect(() => {
     setMobileMenuOpen(false)
@@ -65,12 +75,9 @@ const Header = () => {
 
   return (
     <>
-      {/* Announcement Banner */}
-      <div id="announcement-banner" className="h-8 flex items-center justify-center font-bold text-sm transition-transform duration-300 ease-out" style={{ backgroundColor: '#FCA311', color: '#000000' }}>
-        <p className="text-center px-4" style={{ color: '#000000' }}>New project launched! Check out our latest work.</p>
-      </div>
+      {showBanner && <AnnouncementBanner />}
 
-      <header className="sticky top-0 z-50 liquid-glass-navbar">
+      <header className={`sticky top-0 z-50 w-full liquid-glass-navbar${scrolled ? ' scrolled' : ''} transition-all duration-300`}>
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo/Name */}

@@ -4,7 +4,9 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion'
-import LightRays from '../components/LightRays'
+import MagicRings from '../components/MagicRings'
+import Header from '../components/Header'
+import AnnouncementBanner from '../components/AnnouncementBanner'
 import LogoLoop from '../components/LogoLoop'
 import FlowingMenu from '../components/FlowingMenu'
 import SocialBottomBar from '../components/SocialBottomBar'
@@ -446,40 +448,53 @@ const Home = () => {
       <style>{`
         @media (max-width: 1023px) {
           .hero-section-mobile {
-            padding-top: 10% !important;
+            padding-top: 0 !important;
           }
           .hero-content-mobile {
-            margin-top: 15% !important;
+            margin-top: 1rem !important;
           }
         }
         .crafting-digital-section {
           background-color: transparent !important;
         }
       `}</style>
+      <AnnouncementBanner />
       {/* Hero Section */}
       <section 
-        className="hero-section hero-section-mobile min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-40 sm:pt-52 md:pt-64 lg:py-0 pb-0 relative overflow-hidden bg-black" 
+        className="hero-section hero-section-magic-rings hero-section-mobile min-h-screen flex flex-col px-4 sm:px-6 lg:px-8 pt-0 pb-0 relative bg-black" 
         style={{ backgroundImage: 'none' }}
       >
-        <div className="absolute inset-0 z-0" style={{ top: 0, height: '100vh' }}>
-          <LightRays
-            raysOrigin="top-center"
-            raysColor="#00ffff"
-            raysSpeed={1.5}
-            lightSpread={0.8}
-            rayLength={1.2}
-            followMouse={true}
-            mouseInfluence={0.1}
+        <div className="hero-section-bg pointer-events-none absolute inset-0 z-0">
+          <MagicRings
+            color="#f4ff00"
+            colorTwo="#fdf882"
+            ringCount={6}
+            speed={1}
+            attenuation={10}
+            lineThickness={2}
+            baseRadius={0.35}
+            radiusStep={0.1}
+            scaleRate={0.1}
+            opacity={0.7}
+            blur={0}
             noiseAmount={0.1}
-            distortion={0.05}
-            className="custom-rays opacity-70"
+            rotation={0}
+            ringGap={1.5}
+            fadeIn={0.7}
+            fadeOut={0.5}
+            followMouse={false}
+            mouseInfluence={0.2}
+            hoverScale={1.2}
+            parallax={0.05}
+            clickBurst={false}
           />
         </div>
-        <div className="max-w-7xl mx-auto w-full relative z-10 px-4 sm:px-6 lg:px-8">
+        <Header showBanner={false} />
+        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex-1 flex flex-col justify-center">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
             {/* Hero Content */}
             <div 
-              className="text-center lg:text-left hero-content-mobile mt-16 sm:mt-20 md:mt-24 lg:mt-[10%] xl:mt-[-4%]"
+              className="text-center lg:text-left hero-content-mobile mt-8 sm:mt-12 lg:mt-[10%] xl:mt-[-4%]"
             >
               <motion.div
                 className="fade-in"
@@ -502,7 +517,7 @@ const Home = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.5 }}
                 >
-                  Frontend React Developer
+                  Frontend Developer
                 </motion.h2>
                 <motion.p
                   className="text-lg text-text-secondary mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed "

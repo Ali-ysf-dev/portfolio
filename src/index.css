@@ -1770,17 +1770,17 @@ textarea {
 
 /* Liquid Glassy Navbar */
 .liquid-glass-navbar {
-  position: sticky;
-  top: 0;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%),
-    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3));
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow:
-    0 8px 32px 0 rgba(0, 0, 0, 0.37),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  background: transparent;
+  border-bottom: none;
+  box-shadow: none;
+  transition: background 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease;
+}
+
+.liquid-glass-navbar.scrolled {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  box-shadow: 0 2px 20px 0 rgba(0, 0, 0, 0.4);
 }
 
 .transition {
@@ -1854,29 +1854,14 @@ textarea {
 /* Hero background */
 .hero-section {
   position: relative;
-  overflow: hidden;
 }
 
-.hero-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    rgba(0, 0, 0, 0.7),
-    /* Full background coverage - top to bottom */
-    radial-gradient(ellipse 150% 100% at 0% 0%, rgba(252, 163, 17, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 150% 100% at 100% 0%, rgba(59, 130, 246, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 150% 100% at 0% 100%, rgba(99, 102, 241, 0.12) 0%, transparent 60%),
-    radial-gradient(ellipse 150% 100% at 100% 100%, rgba(252, 163, 17, 0.12) 0%, transparent 60%),
-    /* Center and middle sections - full width */
-    radial-gradient(ellipse 200% 80% at 50% 20%, rgba(252, 163, 17, 0.1) 0%, transparent 70%),
-    radial-gradient(ellipse 200% 80% at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 70%),
-    radial-gradient(ellipse 200% 80% at 50% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 70%),
-    /* Side coverage - full height */
-    radial-gradient(ellipse 100% 200% at 0% 50%, rgba(252, 163, 17, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 100% 200% at 100% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 1;
+.hero-section-magic-rings::before {
+  display: none;
+}
+
+.hero-section-bg {
+  overflow: hidden;
 }
 
 /* Core Technologies Section with Pattern Background */
