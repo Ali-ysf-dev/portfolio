@@ -1,46 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import viteImagemin from 'vite-plugin-imagemin'
 import { VitePWA } from 'vite-plugin-pwa'
-
-const isVercel = process.env.VERCEL === '1'
 
 export default defineConfig({
   plugins: [
     react(),
-    // imagemin uses native binaries that can fail on Vercel's Linux builders
-    !isVercel && viteImagemin({
-      gifsicle: {
-        optimizationLevel: 7,
-        interlaced: false,
-      },
-      optipng: {
-        optimizationLevel: 7,
-      },
-      mozjpeg: {
-        quality: 85,
-        progressive: true,
-      },
-      pngquant: {
-        quality: [0.8, 0.9],
-        speed: 4,
-      },
-      svg: {
-        plugins: [
-          {
-            name: 'removeViewBox',
-          },
-          {
-            name: 'removeEmptyAttrs',
-            active: false,
-          },
-        ],
-      },
-      webp: {
-        quality: 85,
-      },
-    }),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
@@ -100,7 +65,7 @@ export default defineConfig({
         ],
       },
     }),
-  ].filter(Boolean),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -128,4 +93,3 @@ export default defineConfig({
   },
   assetsInclude: ['**/*.PNG', '**/*.png', '**/*.JPG', '**/*.jpg', '**/*.JPEG', '**/*.jpeg', '**/*.otf', '**/*.ttf', '**/*.woff', '**/*.woff2'],
 })
-
