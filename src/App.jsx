@@ -1,37 +1,11 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Suspense } from 'react'
 import Header from './components/Header'
 import Footer from './components/Footer'
+import PageBackground from './components/PageBackground'
 import Home from './pages/Home'
-import About from './pages/About'
-import Contact from './pages/Contact'
-import Services from './pages/Services'
-import Skills from './pages/Skills'
-
-function AppContent() {
-  const location = useLocation()
-
-  return (
-    <div className="font-sans antialiased">
-      {location.pathname !== '/' && <Header />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/skills" element={<Skills />} />
-      </Routes>
-      <Footer />
-    </div>
-  )
-}
 
 function App() {
-  useEffect(() => {
-    // Scroll to top on route change
-    window.scrollTo(0, 0)
-  }, [])
-
   return (
     <Router
       future={{
@@ -39,10 +13,19 @@ function App() {
         v7_relativeSplatPath: true
       }}
     >
-      <AppContent />
+      <div className="font-sans antialiased">
+        <PageBackground />
+        <Header />
+        <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="*" element={<Home />} />
+          </Routes>
+        </Suspense>
+        <Footer />
+      </div>
     </Router>
   )
 }
 
 export default App
-

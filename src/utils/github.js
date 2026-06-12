@@ -1,161 +1,179 @@
 import { GITHUB_CONFIG } from '../config';
 
-/**
- * Finds PNG image in repository root
- * @param {string} repoName - Repository name
- * @param {string} defaultBranch - Default branch name (usually 'main' or 'master')
- * @returns {Promise<string|null>} URL to PNG image or null if not found
- */
-const findRepoCoverImage = async (repoName, defaultBranch = 'main') => {
-  try {
-    const contentsUrl = `${GITHUB_CONFIG.API_URL}/repos/${GITHUB_CONFIG.USERNAME}/${repoName}/contents`;
-    
-    const headers = {
-      'Accept': 'application/vnd.github.v3+json'
-    };
-    
-    // If you add a token, uncomment this:
-    // if (GITHUB_CONFIG.TOKEN) {
-    //   headers['Authorization'] = `token ${GITHUB_CONFIG.TOKEN}`;
-    // }
+const CACHE_KEY = 'gh_repos_cache_v3';
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+const IMAGE_EXT = /\.(png|jpe?g|webp|gif|avif)$/i;
 
-    const response = await fetch(contentsUrl, { headers });
-    
-    if (!response.ok) {
+// ─── Cache helpers ────────────────────────────────────────────────────────────
+
+const readCache = () => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { ts, data } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL_MS) {
+      localStorage.removeItem(CACHE_KEY);
       return null;
     }
-
-    const contents = await response.json();
-    
-    // Find PNG files in root directory
-    const pngFile = contents.find(file => 
-      file.type === 'file' && 
-      file.name.toLowerCase().endsWith('.png')
-    );
-    
-    if (pngFile) {
-      // Use the download_url from GitHub API (raw content URL)
-      return pngFile.download_url;
-    }
-    
-    return null;
-  } catch (error) {
-    console.error(`Error finding cover image for ${repoName}:`, error);
+    return data;
+  } catch {
     return null;
   }
 };
 
+const readStaleCache = () => {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw).data ?? null;
+  } catch {
+    return null;
+  }
+};
+
+const writeCache = (data) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+  } catch {
+    // storage full or private browsing — silently ignore
+  }
+};
+
+// ─── Auth headers ─────────────────────────────────────────────────────────────
+
+const getHeaders = () => {
+  const headers = { Accept: 'application/vnd.github.v3+json' };
+  const token = GITHUB_CONFIG.TOKEN;
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
+};
+
+// ─── Rate-limit check ─────────────────────────────────────────────────────────
+
+const checkRateLimit = (response) => {
+  if (response.status !== 403 && response.status !== 429) return { isRateLimited: false, resetAt: null };
+  const resetEpoch = response.headers.get('X-RateLimit-Reset');
+  const resetAt = resetEpoch ? new Date(Number(resetEpoch) * 1000) : null;
+  return { isRateLimited: true, resetAt };
+};
+
+// ─── Image URL helpers ────────────────────────────────────────────────────────
+
+const openGraphImage = (repoName) =>
+  `https://opengraph.githubassets.com/1/${GITHUB_CONFIG.USERNAME}/${repoName}`;
+
+const rawGitHubImage = (repoName, branch, filename) =>
+  `https://raw.githubusercontent.com/${GITHUB_CONFIG.USERNAME}/${repoName}/${branch}/${filename}`;
+
+/** Config override for known repos (no API call). */
+const getConfiguredCover = (repoName, branch) => {
+  const filename = GITHUB_CONFIG.PROJECT_COVERS?.[repoName];
+  if (!filename) return null;
+  return rawGitHubImage(repoName, branch, filename);
+};
+
 /**
- * Fetches repositories from GitHub API
- * @param {number} limit - Maximum number of repos to fetch
- * @param {string} sort - Sort by: 'created', 'updated', 'pushed', 'full_name', 'stars'
- * @returns {Promise<Array>} Array of repository objects
+ * Finds the first image file in a repo root via GitHub Contents API.
+ * Uses auth token when available (counts toward API limit, cached for 1 h).
+ */
+const findRootCoverFromApi = async (repoName) => {
+  try {
+    const url = `${GITHUB_CONFIG.API_URL}/repos/${GITHUB_CONFIG.USERNAME}/${repoName}/contents`;
+    const response = await fetch(url, { headers: getHeaders() });
+    if (!response.ok) return null;
+
+    const contents = await response.json();
+    if (!Array.isArray(contents)) return null;
+
+    const imageFile = contents.find(
+      (file) => file.type === 'file' && IMAGE_EXT.test(file.name)
+    );
+
+    if (imageFile?.download_url) return imageFile.download_url;
+    if (imageFile?.name) {
+      const branch = imageFile.path?.split('/')[0] || 'main';
+      return rawGitHubImage(repoName, branch, imageFile.name);
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+/** Resolve cover: config → API root scan → opengraph fallback. */
+const resolveCoverImage = async (repo) => {
+  const branch = repo.default_branch || 'main';
+  const configured = getConfiguredCover(repo.name, branch);
+  if (configured) return configured;
+
+  const fromApi = await findRootCoverFromApi(repo.name);
+  if (fromApi) return fromApi;
+
+  return openGraphImage(repo.name);
+};
+
+// ─── Transform a raw GitHub repo object ───────────────────────────────────────
+
+const transformRepo = (repo, imageUrl) => ({
+  id: repo.id,
+  title: repo.name,
+  shortDescription: repo.description || 'No description available',
+  image: imageUrl,
+  imageFallback: openGraphImage(repo.name),
+  tags: [
+    ...(repo.language ? [repo.language.toLowerCase()] : []),
+    ...(repo.topics || []).slice(0, 3),
+  ],
+  featured: repo.stargazers_count > 0,
+  liveUrl: repo.homepage || null,
+  codeUrl: repo.html_url,
+  stars: repo.stargazers_count,
+  forks: repo.forks_count,
+  updatedAt: repo.updated_at,
+  language: repo.language,
+  isFork: repo.fork,
+});
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+/**
+ * Fetches repositories from GitHub, with localStorage caching.
+ * Cover images are read from each repo's root directory.
  */
 export const fetchGitHubRepos = async (limit = 10, sort = 'updated') => {
+  const cached = readCache();
+  if (cached) return cached;
+
   try {
     const url = `${GITHUB_CONFIG.API_URL}/users/${GITHUB_CONFIG.USERNAME}/repos?sort=${sort}&per_page=${limit}&type=all`;
-    
-    const headers = {
-      'Accept': 'application/vnd.github.v3+json'
-    };
-    
-    // If you add a token, uncomment this:
-    // if (GITHUB_CONFIG.TOKEN) {
-    //   headers['Authorization'] = `token ${GITHUB_CONFIG.TOKEN}`;
-    // }
+    const response = await fetch(url, { headers: getHeaders() });
 
-    const response = await fetch(url, { headers });
-    
+    const { isRateLimited, resetAt } = checkRateLimit(response);
+    if (isRateLimited) {
+      const msg = resetAt
+        ? `GitHub rate limit exceeded. Resets at ${resetAt.toLocaleTimeString()}.`
+        : 'GitHub rate limit exceeded.';
+      console.warn(msg);
+      return readStaleCache() ?? [];
+    }
+
     if (!response.ok) {
       throw new Error(`GitHub API error: ${response.status}`);
     }
 
     const repos = await response.json();
-    
-    // Filter out forked repositories if needed, or keep them
-    // const filteredRepos = repos.filter(repo => !repo.fork);
-    
-    // Transform GitHub API response and fetch cover images
-    const reposWithImages = await Promise.all(
+
+    const result = await Promise.all(
       repos.map(async (repo) => {
-        // Try to find PNG cover image in repository root
-        const defaultBranch = repo.default_branch || 'main';
-        const coverImage = await findRepoCoverImage(repo.name, defaultBranch);
-        
-        // Use cover image if found, otherwise fallback to OpenGraph image
-        const projectImage = coverImage || `https://opengraph.githubassets.com/1/${GITHUB_CONFIG.USERNAME}/${repo.name}`;
-        
-        return {
-          id: repo.id,
-          title: repo.name,
-          shortDescription: repo.description || 'No description available',
-          image: projectImage,
-          tags: [
-            ...(repo.language ? [repo.language.toLowerCase()] : []),
-            ...(repo.topics || []).slice(0, 3)
-          ],
-          featured: repo.stargazers_count > 0,
-          liveUrl: repo.homepage || null, // Live demo URL if available
-          codeUrl: repo.html_url, // GitHub repository URL
-          stars: repo.stargazers_count,
-          forks: repo.forks_count,
-          updatedAt: repo.updated_at,
-          language: repo.language,
-          isFork: repo.fork
-        };
+        const imageUrl = await resolveCoverImage(repo);
+        return transformRepo(repo, imageUrl);
       })
     );
-    
-    return reposWithImages;
+
+    writeCache(result);
+    return result;
   } catch (error) {
-    console.error('Error fetching GitHub repos:', error);
-    return [];
+    console.error('Failed to fetch GitHub repos:', error);
+    return readStaleCache() ?? [];
   }
 };
-
-/**
- * Fetches a single repository by name
- */
-export const fetchGitHubRepo = async (repoName) => {
-  try {
-    const url = `${GITHUB_CONFIG.API_URL}/repos/${GITHUB_CONFIG.USERNAME}/${repoName}`;
-    const response = await fetch(url, {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status}`);
-    }
-
-    const repo = await response.json();
-    
-    // Try to find PNG cover image in repository root
-    const defaultBranch = repo.default_branch || 'main';
-    const coverImage = await findRepoCoverImage(repoName, defaultBranch);
-    
-    // Use cover image if found, otherwise fallback to OpenGraph image
-    const projectImage = coverImage || `https://opengraph.githubassets.com/1/${GITHUB_CONFIG.USERNAME}/${repoName}`;
-    
-    return {
-      id: repo.id,
-      title: repo.name,
-      description: repo.description,
-      image: projectImage,
-      tags: [
-        ...(repo.language ? [repo.language.toLowerCase()] : []),
-        ...(repo.topics || [])
-      ],
-      liveUrl: repo.homepage,
-      codeUrl: repo.html_url,
-      stars: repo.stargazers_count,
-      forks: repo.forks_count,
-      language: repo.language
-    };
-  } catch (error) {
-    console.error('Error fetching GitHub repo:', error);
-    return null;
-  }
-};
-

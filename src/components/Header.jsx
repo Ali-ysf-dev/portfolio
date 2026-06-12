@@ -1,210 +1,327 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
+import { motion, AnimatePresence } from 'framer-motion'
 import AnnouncementBanner from './AnnouncementBanner'
+
+const NAV_LINKS = [
+  { href: '#home',     label: 'Home',     num: '01' },
+  { href: '#about',    label: 'About',    num: '02' },
+  { href: '#skills',   label: 'Skills',   num: '03' },
+  { href: '#services', label: 'Services', num: '04' },
+  { href: '#contact',  label: 'Contact',  num: '05' },
+]
+
+// IDs that live inside the scroll stage — mapped to panel index
+const HORIZONTAL_SECTION_INDICES = { '#about': 0, '#skills': 1, '#services': 2, '#projects': 3, '#contact': 4 }
 
 const Header = ({ showBanner = true }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [theme, setTheme] = useState('dark')
   const [scrolled, setScrolled] = useState(false)
-  const location = useLocation()
+  const [activeSection, setActiveSection] = useState('home')
   const navLinksRef = useRef([])
 
   useEffect(() => {
-    // Initialize theme from localStorage
-    const savedTheme = localStorage.getItem('theme') || 'dark'
-    setTheme(savedTheme)
-    document.documentElement.setAttribute('data-theme', savedTheme)
-  }, [])
+    const onScroll = () => {
+      setScrolled(window.scrollY > 32)
 
-  useEffect(() => {
-    // GSAP animations for nav links
-    if (typeof gsap !== 'undefined') {
-      navLinksRef.current.forEach(link => {
-        if (link) {
-          const handleMouseEnter = () => {
-            gsap.to(link, {
-              y: -2,
-              duration: 0.2,
-              ease: "power2.out"
-            })
-          }
-          const handleMouseLeave = () => {
-            gsap.to(link, {
-              y: 0,
-              duration: 0.2,
-              ease: "power2.out"
-            })
-          }
-          link.addEventListener('mouseenter', handleMouseEnter)
-          link.addEventListener('mouseleave', handleMouseLeave)
-          return () => {
-            link.removeEventListener('mouseenter', handleMouseEnter)
-            link.removeEventListener('mouseleave', handleMouseLeave)
-          }
+      const offset = 80
+
+      // Check if we are scrolling through the pinned scroll stage
+      const trackEl = document.getElementById('horizontal-track-section')
+      if (trackEl) {
+        const trackTop = trackEl.offsetTop
+        const trackScrollable = trackEl.offsetHeight - window.innerHeight
+        if (window.scrollY >= trackTop - offset && window.scrollY < trackTop + trackScrollable) {
+          setActiveSection(window.__horizontalActiveSection || 'about')
+          return
         }
-      })
-    }
-  }, [])
+        // Past the stage (footer area) — contact is the last stage section
+        if (window.scrollY >= trackTop + trackScrollable) {
+          setActiveSection('contact')
+          return
+        }
+      }
 
-  // Add glass background once user scrolls past the banner
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 32)
+      setActiveSection('home')
+    }
+
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Close mobile menu when route changes
+  // Lock body scroll when menu is open
   useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [mobileMenuOpen])
+
+  useEffect(() => {
+    if (typeof gsap !== 'undefined') {
+      navLinksRef.current.forEach(link => {
+        if (!link) return
+        const enter = () => gsap.to(link, { y: -2, duration: 0.2, ease: 'power2.out' })
+        const leave = () => gsap.to(link, { y: 0,  duration: 0.2, ease: 'power2.out' })
+        link.addEventListener('mouseenter', enter)
+        link.addEventListener('mouseleave', leave)
+      })
+    }
+  }, [])
+
+  const isActive = (href) => `#${activeSection}` === href
+
+  const handleNavClick = (e, href) => {
+    e.preventDefault()
     setMobileMenuOpen(false)
-  }, [location.pathname])
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark'
-    setTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
-    document.documentElement.setAttribute('data-theme', newTheme)
-  }
+    // Horizontal-section links — jump to the correct panel
+    if (href in HORIZONTAL_SECTION_INDICES) {
+      window.__setHorizontalPanel?.(HORIZONTAL_SECTION_INDICES[href])
+      return
+    }
 
-  const isActive = (path) => {
-    if (path === '/' && location.pathname === '/') return true
-    if (path !== '/' && location.pathname.startsWith(path)) return true
-    return false
+    const id = href.replace('#', '')
+    if (id === 'home') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      const el = document.getElementById(id)
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
   }
 
   return (
     <>
       {showBanner && <AnnouncementBanner />}
 
-      <header className={`sticky top-0 z-50 w-full liquid-glass-navbar${scrolled ? ' scrolled' : ''} transition-all duration-300`}>
+      <style>{`
+        .hdr-logo {
+          font-family: 'Poppins', sans-serif;
+          font-size: 1.35rem;
+          font-weight: 800;
+          letter-spacing: -0.01em;
+          text-decoration: none;
+          line-height: 1;
+        }
+        .hdr-logo-name { color: #ffffff; }
+        .hdr-logo-dot  { color: #FCA311; }
+
+        .hdr-desktop-nav { display: none; }
+        .hdr-mobile-btn  { display: flex !important; }
+        .hdr-mobile-placeholder { display: none; }
+
+        @media (min-width: 768px) {
+          .hdr-desktop-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+          }
+          .hdr-mobile-btn { display: none !important; }
+          .hdr-nav-inner  { position: relative; }
+          .hdr-mobile-placeholder { display: block; }
+        }
+      `}</style>
+
+      <header
+        className={`sticky top-0 w-full liquid-glass-navbar${scrolled ? ' scrolled' : ''} transition-all duration-300`}
+        style={{ zIndex: mobileMenuOpen ? 110 : 50 }}
+      >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo/Name */}
-            <div className="logoimg flex-shrink-0">
-              <Link to="/" className="text-xl font-bold text-gradient">
-                ALI YOUSSEF.
-              </Link>
+          <div className="hdr-nav-inner flex items-center justify-between h-16">
+
+            {/* Logo */}
+            <div style={{ flexShrink: 0, position: 'relative', zIndex: 1 }}>
+              <a href="#home" className="hdr-logo" onClick={(e) => handleNavClick(e, '#home')}>
+                <span className="hdr-logo-name">Ali</span><span className="hdr-logo-dot"> .</span>
+              </a>
             </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-8">
-                <Link
-                  to="/"
-                  ref={el => navLinksRef.current[0] = el}
-                  className={`nav-link text-text-secondary hover:text-primary transition-colors duration-200 px-3 py-2 rounded-md text-sm font-medium relative ${isActive('/') ? 'active' : ''}`}
+            {/* Desktop nav — absolutely centred */}
+            <div className="hdr-desktop-nav">
+              {NAV_LINKS.map((link, i) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  ref={el => navLinksRef.current[i] = el}
+                  onClick={(e) => handleNavClick(e, link.href)}
+                  className={`nav-link text-text-secondary hover:text-primary transition-colors duration-200 px-3 py-2 rounded-md text-sm font-medium relative ${isActive(link.href) ? 'active' : ''}`}
                 >
-                  Home
-                </Link>
-                <Link
-                  to="/about"
-                  ref={el => navLinksRef.current[1] = el}
-                  className={`nav-link text-text-secondary hover:text-primary transition-colors duration-200 px-3 py-2 rounded-md text-sm font-medium relative ${isActive('/about') ? 'active' : ''}`}
-                >
-                  About
-                </Link>
-                <Link
-                  to="/skills"
-                  ref={el => navLinksRef.current[2] = el}
-                  className={`nav-link text-text-secondary hover:text-primary transition-colors duration-200 px-3 py-2 rounded-md text-sm font-medium relative ${isActive('/skills') ? 'active' : ''}`}
-                >
-                  Skills
-                </Link>
-                <Link
-                  to="/services"
-                  ref={el => navLinksRef.current[3] = el}
-                  className={`nav-link text-text-secondary hover:text-primary transition-colors duration-200 px-3 py-2 rounded-md text-sm font-medium relative ${isActive('/services') ? 'active' : ''}`}
-                >
-                  Services
-                </Link>
-                <Link
-                  to="/contact"
-                  ref={el => navLinksRef.current[4] = el}
-                  className={`nav-link text-text-secondary hover:text-primary transition-colors duration-200 px-3 py-2 rounded-md text-sm font-medium relative ${isActive('/contact') ? 'active' : ''}`}
-                >
-                  Contact
-                </Link>
-              </div>
+                  {link.label}
+                </a>
+              ))}
             </div>
 
-            {/* Theme Toggle & Mobile Menu Button */}
-            <div className="flex items-center space-x-4">
-              {/* Theme Toggle */}
-              <button
-                id="theme-toggle"
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-surface hover:bg-surface-hover transition-colors duration-200"
-                aria-label="Toggle theme"
-                style={{ display: 'none' }}
-              >
-                <svg id="sun-icon" className={`w-5 h-5 text-text-secondary ${theme === 'dark' ? 'hidden' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <svg id="moon-icon" className={`w-5 h-5 text-text-secondary ${theme === 'dark' ? '' : 'hidden'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              </button>
+            {/* Right spacer on desktop so logo stays left / links stay centred */}
+            <div style={{ flexShrink: 0, width: 36 }} aria-hidden="true" className="hdr-mobile-placeholder" />
 
-              {/* Mobile Menu Button */}
-              <button
-                id="mobile-menu-button"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg bg-surface hover:bg-surface-hover transition-colors duration-200"
-                aria-label="Toggle mobile menu"
-              >
-                <svg className="w-6 h-6 text-text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation Menu */}
-          <div id="mobile-menu" className={`md:hidden ${mobileMenuOpen ? '' : 'hidden'}`}>
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-surface rounded-lg mt-2">
-              <Link
-                to="/"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`nav-link text-text-secondary hover:text-primary block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 relative ${isActive('/') ? 'active' : ''}`}
-              >
-                Home
-              </Link>
-              <Link
-                to="/about"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`nav-link text-text-secondary hover:text-primary block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 relative ${isActive('/about') ? 'active' : ''}`}
-              >
-                About
-              </Link>
-              <Link
-                to="/skills"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`nav-link text-text-secondary hover:text-primary block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 relative ${isActive('/skills') ? 'active' : ''}`}
-              >
-                Skills
-              </Link>
-              <Link
-                to="/services"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`nav-link text-text-secondary hover:text-primary block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 relative ${isActive('/services') ? 'active' : ''}`}
-              >
-                Services
-              </Link>
-              <Link
-                to="/contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className={`nav-link text-text-secondary hover:text-primary block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 relative ${isActive('/contact') ? 'active' : ''}`}
-              >
-                Contact
-              </Link>
-            </div>
+            {/* Mobile menu button */}
+            <button
+              className="hdr-mobile-btn relative focus:outline-none"
+              style={{ width: 36, height: 36, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
+              onClick={() => setMobileMenuOpen(v => !v)}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+            >
+              <motion.span
+                animate={mobileMenuOpen ? { rotate: 45, y: 5 } : { rotate: 0, y: 0 }}
+                transition={{ duration: 0.25 }}
+                style={{ display: 'block', width: 22, height: 2, borderRadius: 2, background: mobileMenuOpen ? '#FCA311' : 'rgba(255,255,255,0.75)', transformOrigin: 'center' }}
+              />
+              <motion.span
+                animate={mobileMenuOpen ? { opacity: 0, scaleX: 0 } : { opacity: 1, scaleX: 1 }}
+                transition={{ duration: 0.2 }}
+                style={{ display: 'block', width: 22, height: 2, borderRadius: 2, background: 'rgba(255,255,255,0.75)' }}
+              />
+              <motion.span
+                animate={mobileMenuOpen ? { rotate: -45, y: -5 } : { rotate: 0, y: 0 }}
+                transition={{ duration: 0.25 }}
+                style={{ display: 'block', width: 22, height: 2, borderRadius: 2, background: mobileMenuOpen ? '#FCA311' : 'rgba(255,255,255,0.75)', transformOrigin: 'center' }}
+              />
+            </button>
           </div>
         </nav>
       </header>
+
+      {/* Full-screen mobile overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            key="mobile-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 100,
+              background: 'rgba(6,6,6,0.97)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              display: 'flex',
+              flexDirection: 'column',
+              padding: '6rem 2rem 3rem',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Ambient orb */}
+            <div style={{
+              position: 'absolute',
+              top: '-20%',
+              right: '-15%',
+              width: 380,
+              height: 380,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(252,163,17,0.08) 0%, transparent 70%)',
+              pointerEvents: 'none',
+            }} />
+            <div style={{
+              position: 'absolute',
+              bottom: '5%',
+              left: '-10%',
+              width: 260,
+              height: 260,
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(252,163,17,0.05) 0%, transparent 70%)',
+              pointerEvents: 'none',
+            }} />
+
+            {/* Nav links */}
+            <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.25rem' }}>
+              {NAV_LINKS.map((link, i) => (
+                <motion.div
+                  key={link.href}
+                  initial={{ opacity: 0, x: -28 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -16 }}
+                  transition={{ duration: 0.3, delay: 0.05 + i * 0.06 }}
+                >
+                  <a
+                    href={link.href}
+                    onClick={(e) => handleNavClick(e, link.href)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1.1rem',
+                      padding: '1rem 0',
+                      borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      textDecoration: 'none',
+                      position: 'relative',
+                    }}
+                  >
+                    <span style={{
+                      fontSize: '0.62rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.1em',
+                      color: isActive(link.href) ? '#FCA311' : 'rgba(255,255,255,0.2)',
+                      width: '1.8rem',
+                      flexShrink: 0,
+                    }}>
+                      {link.num}
+                    </span>
+                    <span style={{
+                      fontSize: 'clamp(1.6rem, 6vw, 2.4rem)',
+                      fontWeight: 800,
+                      letterSpacing: '-0.02em',
+                      lineHeight: 1.1,
+                      color: isActive(link.href) ? '#FCA311' : 'rgba(255,255,255,0.85)',
+                      transition: 'color 0.2s',
+                    }}>
+                      {link.label}
+                    </span>
+                    {isActive(link.href) && (
+                      <motion.span
+                        layoutId="mobile-active-dot"
+                        style={{
+                          marginLeft: 'auto',
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          background: '#FCA311',
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+                  </a>
+                </motion.div>
+              ))}
+            </nav>
+
+            {/* Footer inside drawer */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.4 }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '1.5rem' }}
+            >
+              <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.05em' }}>
+                ALI YOUSSEF · PORTFOLIO
+              </span>
+              <a
+                href="#contact"
+                onClick={(e) => handleNavClick(e, '#contact')}
+                style={{
+                  fontSize: '0.72rem',
+                  color: '#FCA311',
+                  textDecoration: 'none',
+                  padding: '0.35rem 0.8rem',
+                  border: '1px solid rgba(252,163,17,0.3)',
+                  borderRadius: '999px',
+                  letterSpacing: '0.04em',
+                  fontWeight: 600,
+                }}
+              >
+                Get in touch →
+              </a>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }
 
 export default Header
-

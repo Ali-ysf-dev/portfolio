@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap');
 
 /* Teqto Demo Font */
@@ -2063,10 +2061,9 @@ textarea {
   z-index: 1;
 }
 
-/* Custom Background Color - Very dark shade at 100% opacity */
+/* Let global page background show through section heroes */
 .section-bg-custom {
-  background-color: #020315 !important;
-  opacity: 1 !important;
+  background-color: transparent !important;
 }
 
 /* Nav Link Underline Animation */

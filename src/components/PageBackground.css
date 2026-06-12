@@ -1,0 +1,111 @@
+.page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #060606;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.page-bg-spotlight {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 160vmax;
+  height: 160vmax;
+  transform: translate(-50%, -50%);
+  background:
+    conic-gradient(from 0deg at 50% 50%,
+      rgba(252,163,17,0.06) 0deg,
+      transparent 50deg,
+      rgba(244,255,0,0.04) 130deg,
+      transparent 200deg,
+      rgba(252,163,17,0.06) 280deg,
+      transparent 340deg,
+      rgba(252,163,17,0.06) 360deg);
+  opacity: 0.9;
+  animation: pageBgSpin 60s linear infinite;
+  will-change: transform;
+}
+
+.page-bg-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1.2px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse 90% 90% at 50% 40%, #000 30%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 90% at 50% 40%, #000 30%, transparent 85%);
+}
+
+.page-bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(130px);
+  will-change: transform, opacity;
+}
+
+.page-bg-blob-1 {
+  width: 50vw;
+  height: 50vw;
+  max-width: 680px;
+  max-height: 680px;
+  background: radial-gradient(circle, rgba(252,163,17,0.16), transparent 70%);
+  top: -12%;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: pageBgBreathe 14s ease-in-out infinite;
+}
+
+.page-bg-blob-2 {
+  width: 38vw;
+  height: 38vw;
+  max-width: 480px;
+  max-height: 480px;
+  background: radial-gradient(circle, rgba(244,255,0,0.08), transparent 70%);
+  top: 55%;
+  left: -6%;
+  animation: pageBgBreatheSide 18s ease-in-out infinite 2s;
+}
+
+.page-bg-blob-3 {
+  width: 36vw;
+  height: 36vw;
+  max-width: 460px;
+  max-height: 460px;
+  background: radial-gradient(circle, rgba(252,163,17,0.10), transparent 70%);
+  bottom: 2%;
+  right: -6%;
+  animation: pageBgBreatheSide 16s ease-in-out infinite 1s;
+}
+
+.page-bg-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 80% at 50% 30%, transparent 50%, rgba(0,0,0,0.55) 100%);
+}
+
+@keyframes pageBgSpin {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes pageBgBreathe {
+  0%, 100% { opacity: 0.55; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.9; transform: translateX(-50%) scale(1.12); }
+}
+
+@keyframes pageBgBreatheSide {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-bg-spotlight,
+  .page-bg-blob {
+    animation: none;
+  }
+}
+
+.page-content {
+  position: relative;
+  z-index: 1;
+}

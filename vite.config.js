@@ -107,12 +107,21 @@ export default defineConfig({
     port: 3000,
   },
   build: {
-    assetsInlineLimit: 4096, // Inline assets smaller than 4kb
+    assetsInlineLimit: 4096,
     rollupOptions: {
       output: {
         assetFileNames: 'assets/[name]-[hash][extname]',
+        manualChunks: {
+          'vendor-react':  ['react', 'react-dom', 'react-router-dom'],
+          'vendor-three':  ['three'],
+          'vendor-gsap':   ['gsap'],
+          'vendor-motion': ['framer-motion'],
+        },
       },
     },
+  },
+  optimizeDeps: {
+    include: ['three', 'gsap', 'framer-motion'],
   },
   assetsInclude: ['**/*.PNG', '**/*.png', '**/*.JPG', '**/*.jpg', '**/*.JPEG', '**/*.jpeg', '**/*.otf', '**/*.ttf', '**/*.woff', '**/*.woff2'],
 })
