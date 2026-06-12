@@ -4,10 +4,13 @@ import path from 'path'
 import viteImagemin from 'vite-plugin-imagemin'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const isVercel = process.env.VERCEL === '1'
+
 export default defineConfig({
   plugins: [
     react(),
-    viteImagemin({
+    // imagemin uses native binaries that can fail on Vercel's Linux builders
+    !isVercel && viteImagemin({
       gifsicle: {
         optimizationLevel: 7,
         interlaced: false,
@@ -97,7 +100,7 @@ export default defineConfig({
         ],
       },
     }),
-  ],
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
