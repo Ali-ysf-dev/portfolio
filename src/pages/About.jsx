@@ -92,10 +92,27 @@ const About = () => {
   }, [])
 
   return (
-    <section id="about" className="page-content">
+    <section id="about" className="page-content ab-section">
       <style>{`
-        .ab-page { max-width: 70rem; margin: 0 auto; padding: 4.5rem 1.5rem 6rem; }
+        .ab-section { overflow-x: hidden; width: 100%; }
+        .ab-page { max-width: 70rem; margin: 0 auto; padding: 4.5rem 1.5rem 6rem; box-sizing: border-box; }
         @media (min-width: 640px) { .ab-page { padding: 5.5rem 2rem 7rem; } }
+        @media (max-width: 639px) {
+          .ab-page { padding: 2.75rem 1rem 4rem; }
+          .ab-hero { margin-bottom: 2rem; }
+          .ab-hero-stage .signature-background-wrapper { width: 100%; max-width: 100%; }
+          .ab-stats {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .ab-stat {
+            border-right: none;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+          }
+          .ab-stat:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.07); }
+          .ab-stat:nth-last-child(-n+2) { border-bottom: none; }
+          .ab-tl-card-top { flex-direction: column; align-items: flex-start; }
+          .ab-tl-card-date { white-space: normal; }
+        }
 
         /* Hero — match Contact / Services header size & placement */
         .ab-hero { text-align: center; margin-bottom: 4rem; position: relative; }
