@@ -8,16 +8,17 @@ import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript, SiNode
 
 import portfolioNoBgImage from '../assets/images/newport.avif'
 import { fetchGitHubRepos } from '../utils/github'
+import { isMobile, motionFade } from '../utils/device'
 
-import About from './About'
-import Skills from './Skills'
-import Services from './Services'
-import Contact from './Contact'
+const About = lazy(() => import('./About'))
+const Skills = lazy(() => import('./Skills'))
+const Services = lazy(() => import('./Services'))
+const Contact = lazy(() => import('./Contact'))
 
 const MagicRings = lazy(() => import('../components/MagicRings'))
 
 const PROJECTS_PER_PAGE = 3
-const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768
+const PanelFallback = () => <div style={{ minHeight: '40vh' }} aria-hidden />
 
 const Home = () => {
   const signaturePathRef = useRef(null)
@@ -37,12 +38,11 @@ const Home = () => {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  // Fetch GitHub projects on mount (projects panel is inside overflow:hidden horizontal track
-  // so IntersectionObserver is unreliable — fetch eagerly instead)
+  // Fetch GitHub projects — defer on mobile to keep first paint fast
   useEffect(() => {
     const load = async () => {
       try {
-        const repos = await fetchGitHubRepos(30, 'updated')
+        const repos = await fetchGitHubRepos(isMobile() ? 9 : 30, 'updated')
         setGithubProjects(repos)
       } catch (err) {
         console.error('Failed to load GitHub projects:', err)
@@ -50,10 +50,30 @@ const Home = () => {
         setLoadingProjects(false)
       }
     }
+
+    if (isMobile()) {
+      const id = window.requestIdleCallback
+        ? window.requestIdleCallback(() => load(), { timeout: 4000 })
+        : setTimeout(load, 1500)
+      return () => {
+        if (window.requestIdleCallback) window.cancelIdleCallback(id)
+        else clearTimeout(id)
+      }
+    }
     load()
   }, [])
 
   useEffect(() => {
+    if (isMobile()) {
+      if (signatureSvgRef.current) signatureSvgRef.current.style.opacity = '1'
+      if (signaturePathRef.current) {
+        const path = signaturePathRef.current
+        path.style.strokeDashoffset = '0'
+        path.style.opacity = '1'
+      }
+      return
+    }
+
     const setupAnimations = () => {
       if (typeof gsap !== 'undefined') {
         // Hero Signature Animation
@@ -558,9 +578,9 @@ const Home = () => {
           {/* Top-left text block */}
           <div className="hero-text-block">
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={isDesktop ? { opacity: 0, y: 30 } : false}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
+              transition={{ duration: 0.6, delay: isDesktop ? 0.3 : 0 }}
             >
               <p className="hero-eyebrow">
                 <span className="hero-eyebrow-dot" />
@@ -570,9 +590,9 @@ const Home = () => {
 
             <motion.h1
               className="hero-title"
-              initial={{ opacity: 0, y: 30 }}
+              initial={isDesktop ? { opacity: 0, y: 30 } : false}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.42 }}
+              transition={{ duration: 0.6, delay: isDesktop ? 0.42 : 0 }}
             >
               Hi, I'm{' '}
               <span className="text-gradient" ref={heroTitleRef}>Ali Youssef</span>
@@ -580,18 +600,18 @@ const Home = () => {
 
             <motion.p
               className="hero-subtitle font-circuit-forem"
-              initial={{ opacity: 0, y: 20 }}
+              initial={isDesktop ? { opacity: 0, y: 20 } : false}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.54 }}
+              transition={{ duration: 0.6, delay: isDesktop ? 0.54 : 0 }}
             >
               Frontend Developer
             </motion.p>
 
             <motion.p
               className="hero-desc"
-              initial={{ opacity: 0, y: 20 }}
+              initial={isDesktop ? { opacity: 0, y: 20 } : false}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.66 }}
+              transition={{ duration: 0.6, delay: isDesktop ? 0.66 : 0 }}
             >
               Highly motivated and experienced Front-end Developer seeking to build scalable and fast web applications, combined with AI tools like Vibe Coding to enhance user experience.
             </motion.p>
@@ -600,9 +620,9 @@ const Home = () => {
           {/* Bottom-center: signature + CTA */}
           <motion.div
             className="hero-bottom"
-            initial={{ opacity: 0, y: 20 }}
+            initial={isDesktop ? { opacity: 0, y: 20 } : false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.9 }}
+            transition={{ duration: 0.7, delay: isDesktop ? 0.9 : 0 }}
           >
             <div className="signature-wrapper hero-bottom-sig" id="signature-wrapper">
               <svg ref={signatureSvgRef} id="signature-svg" className="signature-svg signature-hero" viewBox="0 0 1066 481" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -649,12 +669,13 @@ const Home = () => {
               { node: <SiGit />, title: 'Git', href: 'https://git-scm.com' },
               { node: <SiGithub />, title: 'GitHub', href: 'https://github.com/Ali-ysf-dev' },
             ]}
-            speed={80}
+            speed={isDesktop ? 80 : 0}
             direction="left"
             logoHeight={40}
             gap={40}
-            hoverSpeed={20}
-            scaleOnHover
+            hoverSpeed={isDesktop ? 20 : undefined}
+            scaleOnHover={isDesktop}
+            pauseOnHover={!isDesktop}
             fadeOut
             fadeOutColor="#000000"
             ariaLabel="Technology stack"
@@ -665,18 +686,19 @@ const Home = () => {
 
       {/* ── Scroll stage: About → Skills → Services → Projects → Contact ── */}
       <HorizontalScrollTrack panels={[
-        <About key="about" />,
-        <Skills key="skills" />,
-        <Services key="services" />,
-        <ProjectsPanel
-          key="projects"
-          githubProjects={githubProjects}
-          loadingProjects={loadingProjects}
-          visibleProjectCount={visibleProjectCount}
-          setVisibleProjectCount={setVisibleProjectCount}
-          fadeInRefs={fadeInRefs}
-        />,
-        <Contact key="contact" />,
+        <Suspense key="about" fallback={<PanelFallback />}><About /></Suspense>,
+        <Suspense key="skills" fallback={<PanelFallback />}><Skills /></Suspense>,
+        <Suspense key="services" fallback={<PanelFallback />}><Services /></Suspense>,
+        <Suspense key="projects" fallback={<PanelFallback />}>
+          <ProjectsPanel
+            githubProjects={githubProjects}
+            loadingProjects={loadingProjects}
+            visibleProjectCount={visibleProjectCount}
+            setVisibleProjectCount={setVisibleProjectCount}
+            fadeInRefs={fadeInRefs}
+          />
+        </Suspense>,
+        <Suspense key="contact" fallback={<PanelFallback />}><Contact /></Suspense>,
       ]} />
 
       <SocialBottomBar />
@@ -686,20 +708,19 @@ const Home = () => {
 
 // Projects as a standalone panel component (used inside HorizontalScrollTrack)
 function ProjectsPanel({ githubProjects, loadingProjects, visibleProjectCount, setVisibleProjectCount, fadeInRefs }) {
+  const mobile = isMobile()
   return (
       <section id="projects" className="py-12 sm:py-14 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Background orbs */}
-        <div style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: 'rgba(252,163,17,0.03)', filter: 'blur(100px)', top: '20%', left: '-10%', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'rgba(252,163,17,0.03)', filter: 'blur(100px)', bottom: '10%', right: '-8%', pointerEvents: 'none' }} />
+        {!mobile && (
+          <>
+            <div style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: 'rgba(252,163,17,0.03)', filter: 'blur(100px)', top: '20%', left: '-10%', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'rgba(252,163,17,0.03)', filter: 'blur(100px)', bottom: '10%', right: '-8%', pointerEvents: 'none' }} />
+          </>
+        )}
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="section-header">
-            <motion.span
-              className="section-header-eyebrow"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
+            <motion.span className="section-header-eyebrow" {...motionFade()}>
               Portfolio
             </motion.span>
             <h3
@@ -734,9 +755,13 @@ function ProjectsPanel({ githubProjects, loadingProjects, visibleProjectCount, s
                     <motion.div
                       key={project.id}
                       className="project-card-modern"
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: idx * 0.1 }}
+                      {...(mobile
+                        ? { initial: false, animate: { opacity: 1, y: 0 } }
+                        : {
+                            initial: { opacity: 0, y: 30 },
+                            animate: { opacity: 1, y: 0 },
+                            transition: { duration: 0.5, delay: idx * 0.1 },
+                          })}
                     >
                       <div className="project-img-outer">
                         <div className="project-img-wrap">

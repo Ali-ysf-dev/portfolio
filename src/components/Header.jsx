@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { motion, AnimatePresence } from 'framer-motion'
 import AnnouncementBanner from './AnnouncementBanner'
+import { isMobile } from '../utils/device'
 
 const NAV_LINKS = [
   { href: '#home',     label: 'Home',     num: '01' },
@@ -58,15 +59,14 @@ const Header = ({ showBanner = true }) => {
   }, [mobileMenuOpen])
 
   useEffect(() => {
-    if (typeof gsap !== 'undefined') {
-      navLinksRef.current.forEach(link => {
-        if (!link) return
-        const enter = () => gsap.to(link, { y: -2, duration: 0.2, ease: 'power2.out' })
-        const leave = () => gsap.to(link, { y: 0,  duration: 0.2, ease: 'power2.out' })
-        link.addEventListener('mouseenter', enter)
-        link.addEventListener('mouseleave', leave)
-      })
-    }
+    if (isMobile() || typeof gsap === 'undefined') return
+    navLinksRef.current.forEach(link => {
+      if (!link) return
+      const enter = () => gsap.to(link, { y: -2, duration: 0.2, ease: 'power2.out' })
+      const leave = () => gsap.to(link, { y: 0, duration: 0.2, ease: 'power2.out' })
+      link.addEventListener('mouseenter', enter)
+      link.addEventListener('mouseleave', leave)
+    })
   }, [])
 
   const isActive = (href) => `#${activeSection}` === href
