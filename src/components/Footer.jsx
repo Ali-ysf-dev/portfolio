@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { SiGithub, SiLinkedin } from 'react-icons/si'
+import { SiGithub } from 'react-icons/si'
+import { FaLinkedin } from 'react-icons/fa'
 
 const Footer = () => {
   const year = new Date().getFullYear()
@@ -18,7 +19,7 @@ const Footer = () => {
 
   const socials = [
     { label: 'GitHub', href: 'https://github.com/Ali-ysf-dev', icon: SiGithub },
-    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/ali-youssef-a49535346/', icon: SiLinkedin },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/ali-youssef-a49535346/', icon: FaLinkedin },
   ]
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })

@@ -1,0 +1,9 @@
+# Normalize line endings — prevents broken shebangs in shell scripts on Linux
+* text=auto
+
+# Never commit dependencies or local build output
+node_modules export-ignore
+dist export-ignore
+
+# If any npm bin shims are ever staged, keep LF and mark executable
+*.sh text eol=lf
