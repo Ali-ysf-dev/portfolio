@@ -307,11 +307,11 @@ const About = () => {
         </div>
 
             <div className="ab-hero-content">
-              <motion.span className="ab-eyebrow" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+              <motion.span className="ab-eyebrow" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
                 <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/></svg>
                 The Developer
               </motion.span>
-              <motion.h1 className="ab-title" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.08 }}>
+              <motion.h1 className="ab-title" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }}>
                 About <span>Me</span>
               </motion.h1>
             </div>
@@ -320,7 +320,7 @@ const About = () => {
 
         <div className="ab-grid">
           {/* ── Main column ── */}
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.18 }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.18 }}>
 
             {/* Intro */}
             <div className="ab-intro-card">
@@ -358,8 +358,7 @@ const About = () => {
                     key={i}
                     className="ab-tl-entry"
                     initial={{ opacity: 0, x: -16 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
+                    animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: i * 0.12 }}
                   >
                     {/* Node */}
@@ -405,7 +404,7 @@ const About = () => {
           </motion.div>
 
           {/* ── Sidebar ── */}
-          <motion.div className="ab-sidebar" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.28 }}>
+          <motion.div className="ab-sidebar" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.28 }}>
 
             {/* Contact */}
             <div className="ab-side-card">

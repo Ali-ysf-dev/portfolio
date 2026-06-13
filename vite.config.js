@@ -36,17 +36,10 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Hashed JS/CSS are precached at build time — avoid NetworkFirst here,
+        // which adds latency and can serve stale bundles in production.
+        navigateFallback: 'index.html',
         runtimeCaching: [
-          {
-            urlPattern: ({ request }) =>
-              request.destination === 'document' ||
-              request.destination === 'script' ||
-              request.destination === 'style',
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'app-shell',
-            },
-          },
           {
             urlPattern: ({ request }) => request.destination === 'image',
             handler: 'StaleWhileRevalidate',

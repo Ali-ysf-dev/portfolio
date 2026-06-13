@@ -289,21 +289,21 @@ const Contact = () => {
       <div className="ct-page">
         {/* Hero */}
         <div className="ct-hero">
-          <motion.span className="ct-eyebrow" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
+          <motion.span className="ct-eyebrow" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
             <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             Let's Talk
           </motion.span>
-          <motion.h1 className="ct-title" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.08 }}>
+          <motion.h1 className="ct-title" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }}>
             Get In <span>Touch</span>
           </motion.h1>
-          <motion.p className="ct-subtitle" initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.16 }}>
+          <motion.p className="ct-subtitle" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.16 }}>
             Ready to bring your ideas to life? Let's discuss your project and create something great together.
           </motion.p>
         </div>
 
         <div className="ct-grid">
           {/* ── Form ── */}
-          <motion.div className="ct-form-card" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.22 }}>
+          <motion.div className="ct-form-card" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.22 }}>
             <p className="ct-form-title">Send a Message</p>
 
             <AnimatePresence mode="wait">
@@ -392,7 +392,7 @@ const Contact = () => {
           </motion.div>
 
           {/* ── Sidebar ── */}
-          <motion.div className="ct-sidebar" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.3 }}>
+          <motion.div className="ct-sidebar" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}>
 
             {/* Contact info */}
             <div className="ct-info-card">

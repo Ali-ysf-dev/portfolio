@@ -63,8 +63,7 @@ const Skills = () => {
         <motion.span
           className="sk-eyebrow"
           initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
         >
           <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/></svg>
@@ -73,8 +72,7 @@ const Skills = () => {
         <motion.h1
           className="sk-title"
           initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.08 }}
         >
           Skills &amp; <span>Expertise</span>
@@ -82,8 +80,7 @@ const Skills = () => {
         <motion.p
           className="sk-subtitle"
           initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.16 }}
         >
           Technical competencies and tools developed through hands-on development experience.

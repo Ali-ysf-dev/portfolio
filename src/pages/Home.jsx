@@ -697,8 +697,7 @@ function ProjectsPanel({ githubProjects, loadingProjects, visibleProjectCount, s
             <motion.span
               className="section-header-eyebrow"
               initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
               Portfolio
@@ -736,8 +735,7 @@ function ProjectsPanel({ githubProjects, loadingProjects, visibleProjectCount, s
                       key={project.id}
                       className="project-card-modern"
                       initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, margin: '-40px' }}
+                      animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: idx * 0.1 }}
                     >
                       <div className="project-img-outer">

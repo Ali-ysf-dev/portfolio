@@ -52,9 +52,26 @@ const HorizontalScrollTrack = ({ panels }) => {
       const outer = outerRef.current
       if (!outer) return
       const { readDist, transDist, total } = metricsRef.current
-      if (!total) return
       const vh = window.innerHeight
       const vw = window.innerWidth
+
+      if (!total) {
+        // Layout not measured yet — keep the first panel visible at rest
+        panelRefs.current.forEach((el, j) => {
+          if (!el) return
+          el.scrollTop = 0
+          if (j === 0) {
+            el.style.visibility = 'visible'
+            el.style.transform = 'none'
+          } else {
+            el.style.visibility = 'hidden'
+            el.style.transform = 'translate3d(100vw, 0, 0)'
+          }
+        })
+        window.__horizontalActiveSection = SECTION_IDS[0]
+        return
+      }
+
       const scrolled = Math.max(0, Math.min(total, window.scrollY - outer.offsetTop))
 
       // Walk the phases to find the active section, its inner scroll position,
@@ -143,24 +160,36 @@ const HorizontalScrollTrack = ({ panels }) => {
     }
     window.__horizontalActiveSection = SECTION_IDS[0]
 
-    measure()
-    apply()
-
-    const onScroll = () => apply()
-    const onResize = () => {
+    const scheduleMeasure = () => {
       measure()
       apply()
     }
+
+    scheduleMeasure()
+    requestAnimationFrame(scheduleMeasure)
+    document.fonts?.ready?.then(scheduleMeasure)
+
+    let scrollRaf = 0
+    const onScroll = () => {
+      if (scrollRaf) return
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = 0
+        apply()
+      })
+    }
+    const onResize = () => scheduleMeasure()
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onResize, { passive: true })
 
-    // Re-measure when panel content changes size (e.g. GitHub projects load)
+    // Re-measure when panel or its content changes size (e.g. GitHub projects load)
     const ro = new ResizeObserver(onResize)
     panelRefs.current.forEach((p) => {
+      if (p) ro.observe(p)
       if (p?.firstElementChild) ro.observe(p.firstElementChild)
     })
 
     return () => {
+      if (scrollRaf) cancelAnimationFrame(scrollRaf)
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
       ro.disconnect()
@@ -180,32 +209,31 @@ const HorizontalScrollTrack = ({ panels }) => {
       style={{ height: `calc(100vh + ${stageExtra}px)` }}
     >
       {/* Sticky viewport — stays pinned while the user scrolls through the stage */}
-      <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' }}>
+      <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', zIndex: 2, isolation: 'isolate' }}>
 
         {panels.map((panel, i) => (
           <div
             key={i}
             ref={(el) => { panelRefs.current[i] = el }}
             style={{
-              position: 'absolute',
-              inset: 0,
-              // Content scroll is driven programmatically — never by the wheel —
-              // so a section can't be scrolled before the previous one finishes.
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              paddingTop: `${HEADER_OFFSET}px`,
-              boxSizing: 'border-box',
-              willChange: 'transform',
-              visibility: i === 0 ? 'visible' : 'hidden',
-              transform: i === 0 ? 'none' : 'translate3d(100vw, 0, 0)',
-            }}
-          >
-            {/* margin auto centres short panels vertically; tall panels start at the top */}
-            <div style={{ margin: 'auto 0', width: '100%' }}>
-              {panel}
+                position: 'absolute',
+                inset: 0,
+                // Content scroll is driven programmatically — never by the wheel —
+                // so a section can't be scrolled before the previous one finishes.
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                paddingTop: `${HEADER_OFFSET}px`,
+                boxSizing: 'border-box',
+                willChange: 'transform',
+                visibility: i === 0 ? 'visible' : 'hidden',
+                transform: i === 0 ? 'none' : 'translate3d(100vw, 0, 0)',
+              }}
+            >
+              <div style={{ width: '100%', flex: '0 0 auto' }}>
+                {panel}
+              </div>
             </div>
-          </div>
         ))}
 
         {/* Scroll hint — arrow points where the next transition goes */}
