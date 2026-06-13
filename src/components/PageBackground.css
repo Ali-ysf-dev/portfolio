@@ -98,17 +98,6 @@
   50% { opacity: 0.85; transform: scale(1.12); }
 }
 
-@media (max-width: 767px) {
-  .page-bg-spotlight,
-  .page-bg-blob {
-    animation: none;
-    will-change: auto;
-  }
-  .page-bg-blob {
-    filter: blur(60px);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .page-bg-spotlight,
   .page-bg-blob {

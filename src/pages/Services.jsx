@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { motionFade } from '../utils/device'
 
 const SERVICES = [
   {
@@ -229,20 +228,20 @@ const Services = () => {
       <div className="sv-page">
         {/* Hero */}
         <div className="sv-hero">
-          <motion.span className="sv-eyebrow" {...motionFade()}>
+          <motion.span className="sv-eyebrow" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
             <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             What I Offer
           </motion.span>
-          <motion.h1 className="sv-title" {...motionFade(0.08, 18)}>
+          <motion.h1 className="sv-title" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }}>
             My <span>Services</span>
           </motion.h1>
-          <motion.p className="sv-subtitle" {...motionFade(0.16, 12)}>
+          <motion.p className="sv-subtitle" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.16 }}>
             From web apps to AI automations — comprehensive development solutions to bring your ideas to life.
           </motion.p>
         </div>
 
         {/* ── Split panel ── */}
-        <motion.div className="sv-panel" {...motionFade(0.22, 24)}>
+        <motion.div className="sv-panel" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.22 }}>
           {/* Left: list */}
           <div className="sv-list">
             {SERVICES.map((s, i) => (
@@ -326,7 +325,7 @@ const Services = () => {
         </motion.div>
 
         {/* CTA */}
-        <motion.div className="sv-cta" {...motionFade(0, 20)}>
+        <motion.div className="sv-cta" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
           <h2 className="sv-cta-title">Ready to Start Your Project?</h2>
           <p className="sv-cta-sub">Let's discuss your requirements and build something great together.</p>
           <div className="sv-cta-btns">

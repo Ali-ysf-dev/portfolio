@@ -1,9 +1,5 @@
-import { lazy, Suspense, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import MobileSkills from '../components/MobileSkills'
-import { isMobile, motionFade } from '../utils/device'
-
-const FlowingMenu = lazy(() => import('../components/FlowingMenu'))
+import FlowingMenu from '../components/FlowingMenu'
 
 const flowingMenuItems = [
   { link: '#skills', text: 'Frontend Skills', image: 'https://picsum.photos/600/400?random=1' },
@@ -12,14 +8,6 @@ const flowingMenuItems = [
 ]
 
 const Skills = () => {
-  const [mobile, setMobile] = useState(() => isMobile())
-
-  useEffect(() => {
-    const onResize = () => setMobile(isMobile())
-    window.addEventListener('resize', onResize, { passive: true })
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-
   return (
     <section id="skills" className="page-content">
       <style>{`
@@ -70,36 +58,47 @@ const Skills = () => {
         }
       `}</style>
 
+      {/* Section Header */}
       <div className="sk-hero">
-        <motion.span className="sk-eyebrow" {...motionFade()}>
+        <motion.span
+          className="sk-eyebrow"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+        >
           <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"/></svg>
           Capabilities
         </motion.span>
-        <motion.h1 className="sk-title" {...motionFade(0.08, 16)}>
+        <motion.h1
+          className="sk-title"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.08 }}
+        >
           Skills &amp; <span>Expertise</span>
         </motion.h1>
-        <motion.p className="sk-subtitle" {...motionFade(0.16, 12)}>
+        <motion.p
+          className="sk-subtitle"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.16 }}
+        >
           Technical competencies and tools developed through hands-on development experience.
         </motion.p>
       </div>
 
-      {mobile ? (
-        <MobileSkills />
-      ) : (
-        <div className="sk-menu-wrap">
-          <Suspense fallback={<div style={{ height: 250 }} aria-hidden />}>
-            <FlowingMenu
-              items={flowingMenuItems}
-              speed={15}
-              textColor="#ffffff"
-              bgColor="transparent"
-              marqueeBgColor="black"
-              marqueeTextColor="#060010"
-              borderColor="#ffffff"
-            />
-          </Suspense>
-        </div>
-      )}
+      {/* Flowing Skills Menu */}
+      <div className="sk-menu-wrap">
+        <FlowingMenu
+          items={flowingMenuItems}
+          speed={15}
+          textColor="#ffffff"
+          bgColor="transparent"
+          marqueeBgColor="black"
+          marqueeTextColor="#060010"
+          borderColor="#ffffff"
+        />
+      </div>
     </section>
   )
 }

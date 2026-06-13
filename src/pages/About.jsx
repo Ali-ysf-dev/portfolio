@@ -1,7 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { motion } from 'framer-motion'
-import { isMobile, motionFade } from '../utils/device'
 
 const SIGNATURE_PATH =
   'M202.166 438.282L257.166 379.782L313.166 313.782C329.5 293.115 366.066 249.282 381.666 239.282C401.166 226.782 404.666 213.782 476.666 160.782C534.266 118.382 546 118.449 544.666 123.782C546.833 124.782 538.466 143.081 487.666 208.281C436.866 273.481 412.166 307.115 406.166 315.781L354.666 379.782M988.166 152.781C906.166 166.448 719.066 200.081 626.666 225.281C534.266 250.481 199.833 348.115 44.1662 393.781C31.3329 397.448 4.66619 403.881 0.666193 400.281C-4.33381 395.781 104.166 338.281 190.166 315.281C258.966 296.881 282.833 291.281 286.166 290.781C288.999 288.948 317.366 287.781 408.166 297.781C498.966 307.781 466.999 352.948 439.666 374.281L626.666 118.281M471.666 480.281C554.666 343.781 729.166 63.0812 763.166 32.2812M622.666 290.781C629.833 280.615 648.766 259.081 667.166 254.281C690.166 248.281 637.666 272.281 647.666 285.281C657.666 298.281 694.166 245.781 703.166 248.281C712.166 250.781 685.666 256.281 682.666 282.281C682.666 285.281 687.066 285.281 688.666 285.281C690.666 285.281 734.666 244.781 741.166 245.781C747.666 246.781 712.666 269.281 725.666 270.281C736.066 271.081 747.666 261.281 752.166 256.281M783.166 232.781C776.666 238.615 763.766 254.281 764.166 270.281C764.666 290.281 733.166 293.281 737.166 287.781C741.166 282.281 793.166 257.281 796.666 252.781C800.166 248.281 814.666 243.781 815.166 230.781C815.666 217.781 780.166 265.781 796.666 257.781C813.166 249.781 828.166 247.281 835.666 234.281C843.166 221.281 825.666 241.429 826.666 242.281C827.666 243.133 820.666 255.281 831.666 249.781C842.666 244.281 872.666 229.281 879.166 220.281C885.666 211.281 872.7 216.281 866.666 225.281C860.632 234.281 860.166 240.281 864.166 242.281C867.366 243.881 886.833 230.281 896.166 223.281M1065.17 0.28125C998.166 98.2812 865.666 295.981 871.666 302.781M554.166 274.281L515.166 330.281M598.166 385.281C627.499 371.448 711.966 339.681 815.166 323.281'
@@ -47,12 +46,6 @@ const About = () => {
     const path = signaturePathRef.current
     const svg = signatureSvgRef.current
     if (!path || !svg) return
-
-    if (isMobile()) {
-      svg.style.opacity = '0.35'
-      path.style.strokeDashoffset = '0'
-      return
-    }
 
     const pathLength = path.getTotalLength()
     path.style.strokeDasharray = `${pathLength}`
@@ -331,11 +324,11 @@ const About = () => {
         </div>
 
             <div className="ab-hero-content">
-              <motion.span className="ab-eyebrow" {...motionFade()}>
+              <motion.span className="ab-eyebrow" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
                 <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/></svg>
                 The Developer
               </motion.span>
-              <motion.h1 className="ab-title" {...motionFade(0.08, 18)}>
+              <motion.h1 className="ab-title" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }}>
                 About <span>Me</span>
               </motion.h1>
             </div>
@@ -344,7 +337,7 @@ const About = () => {
 
         <div className="ab-grid">
           {/* ── Main column ── */}
-          <motion.div {...motionFade(0.18, 20)}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.18 }}>
 
             {/* Intro */}
             <div className="ab-intro-card">
@@ -360,7 +353,7 @@ const About = () => {
             {/* Stats */}
             <div className="ab-stats">
               {STATS.map((s, i) => (
-                <motion.div key={s.label} className="ab-stat" {...motionFade(0.25 + i * 0.06, 10)}>
+                <motion.div key={s.label} className="ab-stat" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.25 + i * 0.06 }}>
                   <div className="ab-stat-val">{s.value}</div>
                   <div className="ab-stat-label">{s.label}</div>
                 </motion.div>
@@ -381,13 +374,9 @@ const About = () => {
                   <motion.div
                     key={i}
                     className="ab-tl-entry"
-                    {...(isMobile()
-                      ? { initial: false, animate: { opacity: 1, x: 0 } }
-                      : {
-                          initial: { opacity: 0, x: -16 },
-                          animate: { opacity: 1, x: 0 },
-                          transition: { duration: 0.4, delay: i * 0.12 },
-                        })}
+                    initial={{ opacity: 0, x: -16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4, delay: i * 0.12 }}
                   >
                     {/* Node */}
                     <div
@@ -432,7 +421,7 @@ const About = () => {
           </motion.div>
 
           {/* ── Sidebar ── */}
-          <motion.div className="ab-sidebar" {...motionFade(0.28, 20)}>
+          <motion.div className="ab-sidebar" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.28 }}>
 
             {/* Contact */}
             <div className="ab-side-card">
