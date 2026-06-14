@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { scrollToSection } from '../utils/scrollNav'
 
 const SERVICES = [
   {
@@ -68,8 +69,14 @@ const Services = () => {
   return (
     <section id="services" className="page-content">
       <style>{`
-        .sv-page { max-width: 68rem; margin: 0 auto; padding: 4.5rem 1.5rem 6rem; }
-        @media (min-width: 640px) { .sv-page { padding: 5.5rem 2rem 7rem; } }
+        .sv-page { max-width: 68rem; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
+        @media (min-width: 640px) { .sv-page { padding: 2.5rem 2rem 7rem; } }
+        @media (min-width: 1024px) {
+          .sv-page {
+            margin-top: 0;
+            padding-top: 0;
+          }
+        }
 
         /* Hero */
         .sv-hero { text-align: center; margin-bottom: 4rem; }
@@ -332,7 +339,7 @@ const Services = () => {
             <a
               href="#contact"
               className="sv-btn-primary"
-              onClick={(e) => { e.preventDefault(); window.__setHorizontalPanel?.(4) }}
+              onClick={(e) => { e.preventDefault(); scrollToSection('contact', 4) }}
             >
               Get Started
               <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
@@ -340,7 +347,7 @@ const Services = () => {
             <a
               href="#projects"
               className="sv-btn-secondary"
-              onClick={(e) => { e.preventDefault(); window.__setHorizontalPanel?.(3) }}
+              onClick={(e) => { e.preventDefault(); scrollToSection('projects', 3) }}
             >View My Work</a>
           </div>
         </motion.div>

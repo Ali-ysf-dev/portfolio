@@ -7,7 +7,9 @@ import HorizontalScrollTrack from '../components/HorizontalScrollTrack'
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript, SiNodedotjs, SiGit, SiGithub } from 'react-icons/si'
 
 import portfolioNoBgImage from '../assets/images/newport.avif'
+import heroPersonCutout from '../assets/images/portnobg.avif'
 import { fetchGitHubRepos } from '../utils/github'
+import { scrollToSection } from '../utils/scrollNav'
 
 import About from './About'
 import Skills from './Skills'
@@ -191,10 +193,14 @@ const Home = () => {
           scroll-margin-top: 68px;
         }
 
-        /* Banner (2rem) + header nav (4rem) + hero = one full viewport */
+        /* Banner (2rem) + nav (4rem) overlap; hero bg extends behind navbar */
         .hero-section {
-          min-height: calc(100svh - 6rem);
-          height: calc(100svh - 6rem);
+          position: relative;
+          z-index: 1;
+          margin-top: -4rem;
+          padding-top: 4rem;
+          min-height: calc(100svh - 2rem);
+          height: calc(100svh - 2rem);
           overflow: hidden;
           box-sizing: border-box;
         }
@@ -208,17 +214,23 @@ const Home = () => {
 
         @media (max-width: 1023px) {
           .hero-section-mobile {
-            padding-top: 0 !important;
-            min-height: calc(100svh - 6rem) !important;
-            height: calc(100svh - 6rem) !important;
+            padding-top: 4rem !important;
+            margin-top: -4rem !important;
+            min-height: calc(100svh - 2rem) !important;
+            height: calc(100svh - 2rem) !important;
           }
-          .hero-text-block {
-            padding-top: clamp(1.25rem, 3vh, 3rem);
-            max-width: 100%;
+          .hero-content-grid {
             text-align: center;
+            align-items: center;
+            padding-top: clamp(1.25rem, 3vh, 3rem);
+          }
+          .hero-content-left,
+          .hero-content-right {
+            width: 100%;
+            max-width: 100%;
           }
           .hero-eyebrow { justify-content: center; }
-          .hero-desc { margin: 0 auto; }
+          .hero-desc-card { margin: 0 auto; }
           .hero-bottom {
             padding-bottom: clamp(0.75rem, 2vh, 2.5rem);
           }
@@ -238,13 +250,61 @@ const Home = () => {
           flex-direction: column;
           flex: 1;
           width: 100%;
-          max-width: 80rem;
+          max-width: 88rem;
           margin: 0 auto;
-          padding: 0 2rem;
+          padding: 0 clamp(1rem, 3vw, 2.5rem);
         }
-        .hero-text-block {
-          padding-top: clamp(2rem, 5vh, 5rem);
-          max-width: 42rem;
+        .hero-content-grid {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 1.25rem;
+          width: 100%;
+          min-height: 0;
+        }
+        @media (min-width: 1024px) {
+          .hero-inner {
+            position: static;
+          }
+          .hero-content-grid {
+            display: block;
+            position: relative;
+            flex: 1;
+            width: 100%;
+            min-height: 0;
+            padding-top: clamp(1.5rem, 5vh, 3.5rem);
+          }
+          .hero-content-left {
+            max-width: min(36vw, 24rem);
+            padding-bottom: clamp(2.5rem, 10vh, 7rem);
+            padding-left: 1.15rem;
+            border-left: 2px solid rgba(252, 163, 17, 0.35);
+          }
+          .hero-content-center {
+            display: none;
+          }
+          .hero-content-right {
+            position: absolute;
+            top: 54%;
+            right: clamp(1.25rem, 3vw, 2.75rem);
+            transform: translateY(-50%);
+            width: min(19.5rem, 20vw);
+            max-width: 20rem;
+            z-index: 12;
+          }
+          .hero-desc-card {
+            margin-left: 0;
+          }
+          .hero-title {
+            font-size: clamp(2.15rem, 3.6vw, 3.35rem);
+          }
+          .hero-subtitle {
+            font-size: clamp(1.05rem, 1.55vw, 1.45rem);
+          }
+        }
+        .hero-content-center {
+          display: none;
         }
         .hero-eyebrow {
           display: inline-flex;
@@ -256,6 +316,10 @@ const Home = () => {
           text-transform: uppercase;
           color: #FCA311;
           margin-bottom: 1.25rem;
+          padding: 0.35rem 0.85rem;
+          border: 1px solid rgba(252, 163, 17, 0.25);
+          border-radius: 999px;
+          background: rgba(252, 163, 17, 0.06);
         }
         .hero-eyebrow-dot {
           width: 6px; height: 6px; border-radius: 50%;
@@ -275,20 +339,38 @@ const Home = () => {
           margin-bottom: 0.5rem;
         }
         .hero-subtitle {
-          font-size: clamp(1.1rem, 2.2vw, 1.55rem);
+          font-size: clamp(1rem, 1.8vw, 1.35rem);
           font-weight: 600;
-          letter-spacing: 0.04em;
-          margin-bottom: 1.5rem;
+          letter-spacing: 0.06em;
+          margin-bottom: 0;
           background: linear-gradient(90deg, #FCA311 0%, #ffd270 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
+        .hero-desc-card {
+          padding: 1.2rem 1.35rem;
+          border-radius: 1rem;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(6, 6, 6, 0.42);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+        }
+        @media (max-width: 1023px) {
+          .hero-desc-card {
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            padding: 0;
+          }
+        }
         .hero-desc {
-          font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+          font-size: clamp(0.9rem, 1.4vw, 1.02rem);
           line-height: 1.75;
-          color: rgba(255,255,255,0.55);
-          max-width: 36rem;
+          color: rgba(255, 255, 255, 0.62);
+          max-width: none;
+          margin: 0;
         }
         .hero-bottom {
           margin-top: auto;
@@ -326,29 +408,42 @@ const Home = () => {
           inset: 0;
           z-index: 0;
         }
-        .hero-bg-portrait img {
+        .hero-bg-scene,
+        .hero-person-cutout {
+          position: absolute;
+          inset: 0;
           width: 100%;
           height: 100%;
           object-fit: cover;
           object-position: center top;
-          opacity: 1;
+          display: block;
+        }
+        .hero-rings-layer {
+          position: absolute;
+          inset: 0;
+          z-index: 1;
+        }
+        .hero-person-cutout {
+          z-index: 2;
         }
         .hero-bg-portrait-fade {
           position: absolute;
           inset: 0;
-          z-index: 1;
+          z-index: 3;
           pointer-events: none;
           background:
             linear-gradient(to right, #060606 0%, #060606 8%, rgba(6,6,6,0.85) 18%, rgba(6,6,6,0.4) 30%, transparent 45%),
             linear-gradient(to left,  #060606 0%, #060606 6%, rgba(6,6,6,0.85) 16%, rgba(6,6,6,0.4) 28%, transparent 42%);
         }
-        .hero-rings-layer {
-          position: absolute;
-          inset: 0;
-          z-index: 2;
+        @media (min-width: 1024px) {
+          .hero-bg-portrait-fade {
+            background:
+              linear-gradient(to right, #060606 0%, rgba(6,6,6,0.75) 10%, transparent 26%),
+              linear-gradient(to left, #060606 0%, rgba(6,6,6,0.75) 10%, transparent 26%);
+          }
         }
         @media (max-width: 767px) {
-          .hero-bg-portrait img {
+          .hero-bg-scene {
             object-fit: cover;
             object-position: center top;
           }
@@ -514,6 +609,7 @@ const Home = () => {
         <div className="hero-section-bg pointer-events-none absolute inset-0 z-0">
           <div className="hero-bg-portrait">
             <img
+              className="hero-bg-scene"
               src={portfolioNoBgImage}
               alt=""
               aria-hidden="true"
@@ -521,80 +617,97 @@ const Home = () => {
               fetchPriority="high"
               decoding="async"
             />
+            {isDesktop && (
+              <>
+                <div className="hero-rings-layer">
+                  <Suspense fallback={null}>
+                    <MagicRings
+                      color="#f4ff00"
+                      colorTwo="#fdf882"
+                      ringCount={6}
+                      speed={1}
+                      attenuation={10}
+                      lineThickness={2}
+                      baseRadius={0.35}
+                      radiusStep={0.1}
+                      scaleRate={0.1}
+                      opacity={0.7}
+                      blur={0}
+                      noiseAmount={0.1}
+                      rotation={0}
+                      ringGap={1.5}
+                      fadeIn={0.7}
+                      fadeOut={0.5}
+                      followMouse={false}
+                      mouseInfluence={0.2}
+                      hoverScale={1.2}
+                      parallax={0.05}
+                      clickBurst={false}
+                    />
+                  </Suspense>
+                </div>
+                <img
+                  className="hero-person-cutout"
+                  src={heroPersonCutout}
+                  alt=""
+                  aria-hidden="true"
+                  loading="eager"
+                  decoding="async"
+                />
+              </>
+            )}
             <div className="hero-bg-portrait-fade" />
           </div>
-          {isDesktop && (
-            <div className="hero-rings-layer">
-              <Suspense fallback={null}>
-                <MagicRings
-                  color="#f4ff00"
-                  colorTwo="#fdf882"
-                  ringCount={6}
-                  speed={1}
-                  attenuation={10}
-                  lineThickness={2}
-                  baseRadius={0.35}
-                  radiusStep={0.1}
-                  scaleRate={0.1}
-                  opacity={0.7}
-                  blur={0}
-                  noiseAmount={0.1}
-                  rotation={0}
-                  ringGap={1.5}
-                  fadeIn={0.7}
-                  fadeOut={0.5}
-                  followMouse={false}
-                  mouseInfluence={0.2}
-                  hoverScale={1.2}
-                  parallax={0.05}
-                  clickBurst={false}
-                />
-              </Suspense>
-            </div>
-          )}
         </div>
 
         <div className="hero-inner flex-1 flex flex-col">
-          {/* Top-left text block */}
-          <div className="hero-text-block">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <p className="hero-eyebrow">
-                <span className="hero-eyebrow-dot" />
-                Available for work
-              </p>
-            </motion.div>
+          <div className="hero-content-grid">
+            <div className="hero-content-left">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                <p className="hero-eyebrow">
+                  <span className="hero-eyebrow-dot" />
+                  Available for work
+                </p>
+              </motion.div>
 
-            <motion.h1
-              className="hero-title"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.42 }}
-            >
-              Hi, I'm{' '}
-              <span className="text-gradient" ref={heroTitleRef}>Ali Youssef</span>
-            </motion.h1>
+              <motion.h1
+                className="hero-title"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.42 }}
+              >
+                Hi, I'm{' '}
+                <span className="text-gradient" ref={heroTitleRef}>Ali Youssef</span>
+              </motion.h1>
 
-            <motion.p
-              className="hero-subtitle font-circuit-forem"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.54 }}
-            >
-              Frontend Developer
-            </motion.p>
+              <motion.p
+                className="hero-subtitle"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.54 }}
+              >
+                Frontend Developer
+              </motion.p>
+            </div>
 
-            <motion.p
-              className="hero-desc"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.66 }}
-            >
-              Highly motivated and experienced Front-end Developer seeking to build scalable and fast web applications, combined with AI tools like Vibe Coding to enhance user experience.
-            </motion.p>
+            <div className="hero-content-center" aria-hidden="true" />
+
+            <div className="hero-content-right">
+              <motion.div
+                className="hero-desc-card"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.66 }}
+              >
+                <p className="hero-desc">
+                  Highly motivated and experienced Front-end Developer seeking to build scalable and fast web applications, combined with AI tools like Vibe Coding to enhance user experience.
+                </p>
+              </motion.div>
+            </div>
           </div>
 
           {/* Bottom-center: signature + CTA */}
@@ -625,7 +738,7 @@ const Home = () => {
               className="hero-hire-btn"
               onClick={(e) => {
                 e.preventDefault()
-                window.__setHorizontalPanel?.(4)
+                scrollToSection('contact', 4)
               }}
             >
               HIRE ME NOW
@@ -663,21 +776,36 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── Scroll stage: About → Skills → Services → Projects → Contact ── */}
-      <HorizontalScrollTrack panels={[
-        <About key="about" />,
-        <Skills key="skills" />,
-        <Services key="services" />,
-        <ProjectsPanel
-          key="projects"
-          githubProjects={githubProjects}
-          loadingProjects={loadingProjects}
-          visibleProjectCount={visibleProjectCount}
-          setVisibleProjectCount={setVisibleProjectCount}
-          fadeInRefs={fadeInRefs}
-        />,
-        <Contact key="contact" />,
-      ]} />
+      {isDesktop ? (
+        <HorizontalScrollTrack panels={[
+          <About key="about" />,
+          <Skills key="skills" />,
+          <Services key="services" />,
+          <ProjectsPanel
+            key="projects"
+            githubProjects={githubProjects}
+            loadingProjects={loadingProjects}
+            visibleProjectCount={visibleProjectCount}
+            setVisibleProjectCount={setVisibleProjectCount}
+            fadeInRefs={fadeInRefs}
+          />,
+          <Contact key="contact" />,
+        ]} />
+      ) : (
+        <>
+          <About />
+          <Skills />
+          <Services />
+          <ProjectsPanel
+            githubProjects={githubProjects}
+            loadingProjects={loadingProjects}
+            visibleProjectCount={visibleProjectCount}
+            setVisibleProjectCount={setVisibleProjectCount}
+            fadeInRefs={fadeInRefs}
+          />
+          <Contact />
+        </>
+      )}
 
       <SocialBottomBar />
     </>

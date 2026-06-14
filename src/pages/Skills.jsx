@@ -54,7 +54,15 @@ const Skills = () => {
         .sk-menu-wrap {
           height: 250px;
           position: relative;
-          margin-bottom: 4rem;
+          margin-bottom: 1rem;
+        }
+        @media (min-width: 1024px) {
+          .sk-hero {
+            padding-bottom: 0;
+          }
+          .sk-menu-wrap {
+            margin-bottom: 0;
+          }
         }
       `}</style>
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { motion, AnimatePresence } from 'framer-motion'
 import AnnouncementBanner from './AnnouncementBanner'
+import { scrollToSection, isSmallScreen } from '../utils/scrollNav'
 
 const NAV_LINKS = [
   { href: '#home',     label: 'Home',     num: '01' },
@@ -12,8 +13,13 @@ const NAV_LINKS = [
   { href: '#contact',  label: 'Contact',  num: '05' },
 ]
 
-// IDs that live inside the scroll stage — mapped to panel index
-const HORIZONTAL_SECTION_INDICES = { '#about': 0, '#skills': 1, '#services': 2, '#projects': 3, '#contact': 4 }
+const SECTION_PANEL_INDICES = {
+  '#about': 0,
+  '#skills': 1,
+  '#services': 2,
+  '#projects': 3,
+  '#contact': 4,
+}
 
 const Header = ({ showBanner = true }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -22,33 +28,77 @@ const Header = ({ showBanner = true }) => {
   const navLinksRef = useRef([])
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 32)
+    let cleanup = () => {}
 
-      const offset = 80
+    const setupActiveSection = () => {
+      cleanup()
 
-      // Check if we are scrolling through the pinned scroll stage
       const trackEl = document.getElementById('horizontal-track-section')
-      if (trackEl) {
-        const trackTop = trackEl.offsetTop
-        const trackScrollable = trackEl.offsetHeight - window.innerHeight
-        if (window.scrollY >= trackTop - offset && window.scrollY < trackTop + trackScrollable) {
-          setActiveSection(window.__horizontalActiveSection || 'about')
-          return
+      const useStageNav = trackEl && !isSmallScreen()
+
+      if (useStageNav) {
+        const onScroll = () => {
+          setScrolled(window.scrollY > 32)
+
+          const offset = 80
+          const trackTop = trackEl.offsetTop
+          const trackScrollable = trackEl.offsetHeight - window.innerHeight
+
+          if (window.scrollY >= trackTop - offset && window.scrollY < trackTop + trackScrollable) {
+            setActiveSection(window.__horizontalActiveSection || 'about')
+            return
+          }
+          if (window.scrollY >= trackTop + trackScrollable) {
+            setActiveSection('contact')
+            return
+          }
+          setActiveSection('home')
         }
-        // Past the stage (footer area) — contact is the last stage section
-        if (window.scrollY >= trackTop + trackScrollable) {
-          setActiveSection('contact')
-          return
-        }
+
+        window.addEventListener('scroll', onScroll, { passive: true })
+        onScroll()
+        cleanup = () => window.removeEventListener('scroll', onScroll)
+        return
       }
 
-      setActiveSection('home')
+      const sectionIds = ['about', 'skills', 'services', 'projects', 'contact']
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
+          if (visible[0]?.target?.id) {
+            setActiveSection(visible[0].target.id)
+          }
+        },
+        { rootMargin: '-20% 0px -55% 0px', threshold: [0, 0.15, 0.35, 0.5] }
+      )
+
+      sectionIds.forEach((id) => {
+        const el = document.getElementById(id)
+        if (el) observer.observe(el)
+      })
+
+      const onScroll = () => {
+        setScrolled(window.scrollY > 32)
+        if (window.scrollY < 180) setActiveSection('home')
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true })
+      onScroll()
+      cleanup = () => {
+        observer.disconnect()
+        window.removeEventListener('scroll', onScroll)
+      }
     }
 
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
+    setupActiveSection()
+    window.addEventListener('resize', setupActiveSection, { passive: true })
+
+    return () => {
+      window.removeEventListener('resize', setupActiveSection)
+      cleanup()
+    }
   }, [])
 
   // Lock body scroll when menu is open
@@ -75,19 +125,14 @@ const Header = ({ showBanner = true }) => {
     e.preventDefault()
     setMobileMenuOpen(false)
 
-    // Horizontal-section links — jump to the correct panel
-    if (href in HORIZONTAL_SECTION_INDICES) {
-      window.__setHorizontalPanel?.(HORIZONTAL_SECTION_INDICES[href])
+    const id = href.replace('#', '')
+    const panelIndex = SECTION_PANEL_INDICES[href]
+    if (panelIndex !== undefined) {
+      scrollToSection(id, panelIndex)
       return
     }
 
-    const id = href.replace('#', '')
-    if (id === 'home') {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    } else {
-      const el = document.getElementById(id)
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    scrollToSection('home', 0)
   }
 
   return (
