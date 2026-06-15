@@ -1,4 +1,4 @@
-﻿import { useEffect, useRef, useState, lazy, Suspense } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { motion } from 'framer-motion'
 import LogoLoop from '../components/LogoLoop'
@@ -6,8 +6,7 @@ import SocialBottomBar from '../components/SocialBottomBar'
 import HorizontalScrollTrack from '../components/HorizontalScrollTrack'
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript, SiNodedotjs, SiGit, SiGithub } from 'react-icons/si'
 
-import portfolioNoBgImage from '../assets/images/newport.avif'
-import heroPersonCutout from '../assets/images/portnobg.avif'
+import heroImage from '../assets/images/newport.avif'
 import { fetchGitHubRepos } from '../utils/github'
 import { scrollToSection } from '../utils/scrollNav'
 
@@ -15,8 +14,6 @@ import About from './About'
 import Skills from './Skills'
 import Services from './Services'
 import Contact from './Contact'
-
-const MagicRings = lazy(() => import('../components/MagicRings'))
 
 const PROJECTS_PER_PAGE = 3
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768
@@ -32,7 +29,7 @@ const Home = () => {
   const [loadingProjects, setLoadingProjects] = useState(true)
   const [visibleProjectCount, setVisibleProjectCount] = useState(PROJECTS_PER_PAGE)
 
-  // Track desktop/mobile for MagicRings
+  // Track desktop/mobile layout mode
   useEffect(() => {
     const onResize = () => setIsDesktop(!isMobile())
     window.addEventListener('resize', onResize, { passive: true })
@@ -402,61 +399,38 @@ const Home = () => {
 
         .hero-section-bg {
           z-index: 1;
+          overflow: hidden;
         }
         .hero-bg-portrait {
           position: absolute;
           inset: 0;
-          z-index: 0;
+          width: 100%;
+          height: 100%;
+          background-color: #000000;
         }
-        .hero-bg-scene,
-        .hero-person-cutout {
+        .hero-bg-image {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: cover;
-          object-position: center top;
+          object-fit: contain;
+          object-position: center bottom;
           display: block;
-        }
-        .hero-rings-layer {
-          position: absolute;
-          inset: 0;
-          z-index: 1;
-        }
-        .hero-person-cutout {
-          z-index: 2;
-        }
-        @media (min-width: 768px) {
-          .hero-person-cutout {
-            mix-blend-mode: screen;
-          }
         }
         .hero-bg-portrait-fade {
           position: absolute;
           inset: 0;
-          z-index: 3;
+          z-index: 1;
           pointer-events: none;
           background:
-            linear-gradient(to right, #060606 0%, #060606 8%, rgba(6,6,6,0.85) 18%, rgba(6,6,6,0.4) 30%, transparent 45%),
-            linear-gradient(to left,  #060606 0%, #060606 6%, rgba(6,6,6,0.85) 16%, rgba(6,6,6,0.4) 28%, transparent 42%);
+            linear-gradient(to right, #000000 0%, #000000 5%, rgba(0,0,0,0.92) 14%, rgba(0,0,0,0.65) 24%, rgba(0,0,0,0.3) 38%, transparent 52%),
+            linear-gradient(to left,  #000000 0%, #000000 5%, rgba(0,0,0,0.92) 14%, rgba(0,0,0,0.65) 24%, rgba(0,0,0,0.3) 38%, transparent 52%);
         }
         @media (min-width: 1024px) {
           .hero-bg-portrait-fade {
             background:
-              linear-gradient(to right, #060606 0%, rgba(6,6,6,0.75) 10%, transparent 26%),
-              linear-gradient(to left, #060606 0%, rgba(6,6,6,0.75) 10%, transparent 26%);
-          }
-        }
-        @media (max-width: 767px) {
-          .hero-bg-scene {
-            object-fit: cover;
-            object-position: center top;
-          }
-          .hero-bg-portrait-fade {
-            background:
-              linear-gradient(to right, #060606 0%, #060606 10%, rgba(6,6,6,0.8) 22%, transparent 38%),
-              linear-gradient(to left,  #060606 0%, #060606 10%, rgba(6,6,6,0.8) 22%, transparent 38%),
-              linear-gradient(to bottom, #060606 0%, rgba(6,6,6,0.5) 40%, transparent 75%);
+              linear-gradient(to right, #000000 0%, #000000 3%, rgba(0,0,0,0.95) 10%, rgba(0,0,0,0.72) 20%, rgba(0,0,0,0.38) 34%, transparent 50%),
+              linear-gradient(to left,  #000000 0%, #000000 3%, rgba(0,0,0,0.95) 10%, rgba(0,0,0,0.72) 20%, rgba(0,0,0,0.38) 34%, transparent 50%);
           }
         }
         .section-header {
@@ -614,53 +588,14 @@ const Home = () => {
         <div className="hero-section-bg pointer-events-none absolute inset-0 z-[1]">
           <div className="hero-bg-portrait">
             <img
-              className="hero-bg-scene"
-              src={portfolioNoBgImage}
+              className="hero-bg-image"
+              src={heroImage}
               alt=""
               aria-hidden="true"
               loading="eager"
               fetchpriority="high"
               decoding="async"
             />
-            {isDesktop && (
-              <>
-                <div className="hero-rings-layer">
-                  <Suspense fallback={null}>
-                    <MagicRings
-                      color="#f4ff00"
-                      colorTwo="#fdf882"
-                      ringCount={6}
-                      speed={1}
-                      attenuation={10}
-                      lineThickness={2}
-                      baseRadius={0.35}
-                      radiusStep={0.1}
-                      scaleRate={0.1}
-                      opacity={0.7}
-                      blur={0}
-                      noiseAmount={0.1}
-                      rotation={0}
-                      ringGap={1.5}
-                      fadeIn={0.7}
-                      fadeOut={0.5}
-                      followMouse={false}
-                      mouseInfluence={0.2}
-                      hoverScale={1.2}
-                      parallax={0.05}
-                      clickBurst={false}
-                    />
-                  </Suspense>
-                </div>
-                <img
-                  className="hero-person-cutout"
-                  src={heroPersonCutout}
-                  alt=""
-                  aria-hidden="true"
-                  loading="eager"
-                  decoding="async"
-                />
-              </>
-            )}
             <div className="hero-bg-portrait-fade" />
           </div>
         </div>
