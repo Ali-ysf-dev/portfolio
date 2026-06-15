@@ -1,14 +1,7 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 
-// Section IDs for each panel, in order
 const SECTION_IDS = ['about', 'skills', 'services', 'projects', 'contact']
-
-// Direction of the transition AFTER each section (to the next one):
-// about → skills: horizontal, skills → services: vertical,
-// services → projects: vertical, projects → contact: horizontal
 const TRANSITIONS = ['horizontal', 'vertical', 'vertical', 'horizontal']
-
-// Fixed header height the panels must stay clear of (nav bar; banner scrolls away)
 const HEADER_OFFSET = 64
 
 const getStageViewport = () => {
@@ -20,35 +13,37 @@ const getStageViewport = () => {
 }
 
 const setPanelVisible = (el, visible) => {
-  // opacity (not visibility) avoids blank compositor layers on mobile Safari
   el.style.opacity = visible ? '1' : '0'
   el.style.pointerEvents = visible ? 'auto' : 'none'
   el.setAttribute('aria-hidden', visible ? 'false' : 'true')
 }
 
-/*
-  Scroll stage — pins to the viewport and converts page (vertical) scroll into
-  strictly sequential phases:
-
-    [read section 0] → [transition 0→1] → [read section 1] → [transition 1→2] → ...
-
-  A "read" phase scrolls a section's own overflowing content (driven
-  programmatically, so it can never be scrolled out of order). A section that
-  fits the viewport has a read distance of 0. Only after a section is fully
-  read does the next transition (horizontal or vertical slide) begin.
-*/
 const HorizontalScrollTrack = ({ panels }) => {
   const outerRef = useRef(null)
   const stickyRef = useRef(null)
+  const arrowRef = useRef(null)
   const panelRefs = useRef([])
   const metricsRef = useRef({ readDist: [], transDist: [], total: 0 })
   const indicatorRef = useRef(0)
-  const [indicatorIndex, setIndicatorIndex] = useState(0)
-  const [stageExtra, setStageExtra] = useState(panels.length * 800)
+  const panelStateRef = useRef([])
+  const stageExtraRef = useRef(panels.length * 800)
 
   const n = panels.length
 
   useEffect(() => {
+    const outer = outerRef.current
+    if (outer) {
+      outer.style.height = `calc(var(--stage-vh, 100svh) + ${stageExtraRef.current}px)`
+    }
+
+    const updateOuterHeight = (total) => {
+      if (total === stageExtraRef.current) return
+      stageExtraRef.current = total
+      if (outerRef.current) {
+        outerRef.current.style.height = `calc(var(--stage-vh, 100svh) + ${total}px)`
+      }
+    }
+
     const measure = () => {
       const { h: vh, w: vw } = getStageViewport()
       document.documentElement.style.setProperty('--stage-vh', `${vh}px`)
@@ -62,7 +57,7 @@ const HorizontalScrollTrack = ({ panels }) => {
       const total =
         readDist.reduce((a, b) => a + b, 0) + transDist.reduce((a, b) => a + b, 0)
       metricsRef.current = { readDist, transDist, total }
-      setStageExtra(total)
+      updateOuterHeight(total)
     }
 
     const apply = () => {
@@ -72,7 +67,6 @@ const HorizontalScrollTrack = ({ panels }) => {
       const { h: vh, w: vw } = getStageViewport()
 
       if (!total) {
-        // Layout not measured yet — keep the first panel visible at rest
         panelRefs.current.forEach((el, j) => {
           if (!el) return
           el.scrollTop = 0
@@ -80,10 +74,12 @@ const HorizontalScrollTrack = ({ panels }) => {
             setPanelVisible(el, true)
             el.style.transform = 'none'
             el.style.zIndex = '2'
+            el.style.contentVisibility = 'visible'
           } else {
             setPanelVisible(el, false)
             el.style.transform = 'translate3d(100vw, 0, 0)'
             el.style.zIndex = '0'
+            el.style.contentVisibility = 'hidden'
           }
         })
         window.__horizontalActiveSection = SECTION_IDS[0]
@@ -92,8 +88,6 @@ const HorizontalScrollTrack = ({ panels }) => {
 
       const scrolled = Math.max(0, Math.min(total, window.scrollY - outer.offsetTop))
 
-      // Walk the phases to find the active section, its inner scroll position,
-      // and the progress (t) of the outgoing transition if one is in flight.
       let rem = scrolled
       let active = n - 1
       let activeScroll = readDist[n - 1]
@@ -125,15 +119,10 @@ const HorizontalScrollTrack = ({ panels }) => {
         const el = panelRefs.current[j]
         if (!el) return
 
-        // Inner content position: fully read for passed sections, untouched for
-        // upcoming ones, partial for the active one.
-        el.scrollTop = j < active ? readDist[j] : j === active ? activeScroll : 0
-
         let x = 0
         let y = 0
         let visible = true
         if (j < active) {
-          // Already exited along its own outgoing direction
           if (TRANSITIONS[j] === 'horizontal') x = -vw
           else y = -vh
           visible = false
@@ -143,31 +132,54 @@ const HorizontalScrollTrack = ({ panels }) => {
             else y = -vh * t
           }
         } else if (j === active + 1) {
-          // Entering panel slides in along the active transition's direction
           const k = 1 - t
           if (TRANSITIONS[j - 1] === 'horizontal') x = vw * k
           else y = vh * k
           visible = t > 0
         } else {
-          // Waiting offscreen at its own entrance position
           if (TRANSITIONS[j - 1] === 'horizontal') x = vw
           else y = vh
           visible = false
         }
-        el.style.transform = `translate3d(${x}px, ${y}px, 0)`
-        setPanelVisible(el, visible)
-        el.style.zIndex = visible ? (j === active || j === active + 1 ? '2' : '1') : '0'
+
+        const scrollTop = j < active ? readDist[j] : j === active ? activeScroll : 0
+        const transform = `translate3d(${x}px, ${y}px, 0)`
+        const opacity = visible ? '1' : '0'
+        const zIndex = visible ? (j === active || j === active + 1 ? '2' : '1') : '0'
+        const contentVisibility = visible ? 'visible' : 'hidden'
+
+        const prev = panelStateRef.current[j]
+        if (
+          prev &&
+          prev.transform === transform &&
+          prev.opacity === opacity &&
+          prev.scrollTop === scrollTop &&
+          prev.zIndex === zIndex
+        ) {
+          return
+        }
+
+        panelStateRef.current[j] = { transform, opacity, scrollTop, zIndex }
+        el.scrollTop = scrollTop
+        el.style.transform = transform
+        el.style.opacity = opacity
+        el.style.pointerEvents = visible ? 'auto' : 'none'
+        el.style.zIndex = zIndex
+        el.style.contentVisibility = contentVisibility
+        el.setAttribute('aria-hidden', visible ? 'false' : 'true')
       })
 
       const idx = t > 0.5 ? active + 1 : active
       if (idx !== indicatorRef.current) {
         indicatorRef.current = idx
-        setIndicatorIndex(idx)
+        const nextDir = idx < TRANSITIONS.length ? TRANSITIONS[idx] : 'vertical'
+        if (arrowRef.current) {
+          arrowRef.current.style.transform = nextDir === 'vertical' ? 'rotate(90deg)' : 'none'
+        }
       }
       window.__horizontalActiveSection = SECTION_IDS[idx] ?? ''
     }
 
-    // Programmatic jumps used by nav links
     window.__setHorizontalPanel = (index) => {
       const outer = outerRef.current
       if (!outer) return
@@ -196,20 +208,28 @@ const HorizontalScrollTrack = ({ panels }) => {
         apply()
       })
     }
-    const onResize = () => scheduleMeasure()
+
+    let resizeRaf = 0
+    const onResize = () => {
+      if (resizeRaf) return
+      resizeRaf = requestAnimationFrame(() => {
+        resizeRaf = 0
+        scheduleMeasure()
+      })
+    }
+
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onResize, { passive: true })
     window.visualViewport?.addEventListener('resize', onResize, { passive: true })
     window.visualViewport?.addEventListener('scroll', onResize, { passive: true })
 
-    // Re-measure when panel or its content changes size (e.g. GitHub projects load)
     const ro = new ResizeObserver(onResize)
     panelRefs.current.forEach((p) => {
       if (p) ro.observe(p)
-      if (p?.firstElementChild) ro.observe(p.firstElementChild)
     })
 
     return () => {
+      if (resizeRaf) cancelAnimationFrame(resizeRaf)
       if (scrollRaf) cancelAnimationFrame(scrollRaf)
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
@@ -221,17 +241,12 @@ const HorizontalScrollTrack = ({ panels }) => {
     }
   }, [n, panels])
 
-  // Direction of the upcoming transition, for the scroll hint arrow
-  const nextDir =
-    indicatorIndex < TRANSITIONS.length ? TRANSITIONS[indicatorIndex] : 'vertical'
-
   return (
     <div
       id="horizontal-track-section"
       ref={outerRef}
-      style={{ height: `calc(var(--stage-vh, 100svh) + ${stageExtra}px)` }}
+      style={{ height: `calc(var(--stage-vh, 100svh) + ${stageExtraRef.current}px)` }}
     >
-      {/* Sticky viewport — stays pinned while the user scrolls through the stage */}
       <div
         ref={stickyRef}
         style={{
@@ -243,32 +258,30 @@ const HorizontalScrollTrack = ({ panels }) => {
           isolation: 'isolate',
         }}
       >
-
         {panels.map((panel, i) => (
           <div
             key={i}
             ref={(el) => { panelRefs.current[i] = el }}
             style={{
-                position: 'absolute',
-                inset: 0,
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column',
-                paddingTop: `${HEADER_OFFSET}px`,
-                boxSizing: 'border-box',
-                opacity: i === 0 ? 1 : 0,
-                pointerEvents: i === 0 ? 'auto' : 'none',
-                transform: i === 0 ? 'none' : 'translate3d(100vw, 0, 0)',
-                zIndex: i === 0 ? 2 : 0,
-              }}
-            >
-              <div style={{ width: '100%', flex: '0 0 auto' }}>
-                {panel}
-              </div>
+              position: 'absolute',
+              inset: 0,
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              paddingTop: `${HEADER_OFFSET}px`,
+              boxSizing: 'border-box',
+              opacity: i === 0 ? 1 : 0,
+              pointerEvents: i === 0 ? 'auto' : 'none',
+              transform: i === 0 ? 'none' : 'translate3d(100vw, 0, 0)',
+              zIndex: i === 0 ? 2 : 0,
+            }}
+          >
+            <div style={{ width: '100%', flex: '0 0 auto' }}>
+              {panel}
             </div>
+          </div>
         ))}
 
-        {/* Scroll hint — arrow points where the next transition goes */}
         <div
           style={{
             position: 'absolute',
@@ -288,6 +301,7 @@ const HorizontalScrollTrack = ({ panels }) => {
         >
           scroll
           <svg
+            ref={arrowRef}
             width="14"
             height="14"
             fill="none"
@@ -295,14 +309,13 @@ const HorizontalScrollTrack = ({ panels }) => {
             strokeWidth="1.8"
             viewBox="0 0 24 24"
             style={{
-              transform: nextDir === 'vertical' ? 'rotate(90deg)' : 'none',
+              transform: TRANSITIONS[0] === 'vertical' ? 'rotate(90deg)' : 'none',
               transition: 'transform 0.35s ease',
             }}
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
           </svg>
         </div>
-
       </div>
     </div>
   )

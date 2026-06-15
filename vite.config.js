@@ -36,8 +36,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Hashed JS/CSS are precached at build time — avoid NetworkFirst here,
-        // which adds latency and can serve stale bundles in production.
+        skipWaiting: true,
+        clientsClaim: true,
         navigateFallback: 'index.html',
         runtimeCaching: [
           {
@@ -84,5 +84,5 @@ export default defineConfig({
   optimizeDeps: {
     include: ['three', 'gsap', 'framer-motion'],
   },
-  assetsInclude: ['**/*.PNG', '**/*.png', '**/*.JPG', '**/*.jpg', '**/*.JPEG', '**/*.jpeg', '**/*.otf', '**/*.ttf', '**/*.woff', '**/*.woff2'],
+  assetsInclude: ['**/*.avif', '**/*.AVIF', '**/*.PNG', '**/*.png', '**/*.JPG', '**/*.jpg', '**/*.JPEG', '**/*.jpeg', '**/*.otf', '**/*.ttf', '**/*.woff', '**/*.woff2'],
 })

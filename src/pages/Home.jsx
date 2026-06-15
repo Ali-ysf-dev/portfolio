@@ -264,9 +264,6 @@ const Home = () => {
           min-height: 0;
         }
         @media (min-width: 1024px) {
-          .hero-inner {
-            position: static;
-          }
           .hero-content-grid {
             display: block;
             position: relative;
@@ -286,12 +283,12 @@ const Home = () => {
           }
           .hero-content-right {
             position: absolute;
-            top: 54%;
-            right: clamp(1.25rem, 3vw, 2.75rem);
+            top: 50%;
+            right: 0;
             transform: translateY(-50%);
             width: min(19.5rem, 20vw);
             max-width: 20rem;
-            z-index: 12;
+            z-index: 2;
           }
           .hero-desc-card {
             margin-left: 0;
@@ -403,6 +400,9 @@ const Home = () => {
           box-shadow: 0 8px 28px rgba(252,163,17,0.35);
         }
 
+        .hero-section-bg {
+          z-index: 1;
+        }
         .hero-bg-portrait {
           position: absolute;
           inset: 0;
@@ -425,6 +425,11 @@ const Home = () => {
         }
         .hero-person-cutout {
           z-index: 2;
+        }
+        @media (min-width: 768px) {
+          .hero-person-cutout {
+            mix-blend-mode: screen;
+          }
         }
         .hero-bg-portrait-fade {
           position: absolute;
@@ -606,7 +611,7 @@ const Home = () => {
         className="hero-section hero-section-magic-rings hero-section-mobile flex flex-col px-4 sm:px-6 lg:px-8 pt-0 pb-0 relative"
         style={{ backgroundImage: 'none', backgroundColor: 'transparent' }}
       >
-        <div className="hero-section-bg pointer-events-none absolute inset-0 z-0">
+        <div className="hero-section-bg pointer-events-none absolute inset-0 z-[1]">
           <div className="hero-bg-portrait">
             <img
               className="hero-bg-scene"
@@ -614,7 +619,7 @@ const Home = () => {
               alt=""
               aria-hidden="true"
               loading="eager"
-              fetchPriority="high"
+              fetchpriority="high"
               decoding="async"
             />
             {isDesktop && (
