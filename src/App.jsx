@@ -1,28 +1,31 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { Suspense } from 'react'
+import { Suspense, lazy } from 'react'
 import Header from './components/Header'
-import Footer from './components/Footer'
 import PageBackground from './components/PageBackground'
-import Home from './pages/Home'
+
+const Home = lazy(() => import('./pages/Home'))
+const Footer = lazy(() => import('./components/Footer'))
 
 function App() {
   return (
     <Router
       future={{
         v7_startTransition: true,
-        v7_relativeSplatPath: true
+        v7_relativeSplatPath: true,
       }}
     >
       <div className="font-sans antialiased">
         <PageBackground />
         <Header />
-        <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+        <Suspense fallback={<div style={{ minHeight: '100vh' }} aria-hidden="true" />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="*" element={<Home />} />
           </Routes>
         </Suspense>
-        <Footer />
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </div>
     </Router>
   )

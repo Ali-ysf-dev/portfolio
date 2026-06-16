@@ -1,6 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { gsap } from 'gsap'
 import { motion, AnimatePresence } from 'framer-motion'
 import AnnouncementBanner from './AnnouncementBanner'
 import { scrollToSection, isSmallScreen } from '../utils/scrollNav'
@@ -25,7 +24,6 @@ const Header = ({ showBanner = true }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
-  const navLinksRef = useRef([])
 
   useEffect(() => {
     let cleanup = () => {}
@@ -136,22 +134,6 @@ const Header = ({ showBanner = true }) => {
     return () => { document.body.style.overflow = '' }
   }, [mobileMenuOpen])
 
-  useEffect(() => {
-    const cleanups = []
-    navLinksRef.current.forEach((link) => {
-      if (!link) return
-      const enter = () => gsap.to(link, { y: -2, duration: 0.2, ease: 'power2.out' })
-      const leave = () => gsap.to(link, { y: 0, duration: 0.2, ease: 'power2.out' })
-      link.addEventListener('mouseenter', enter)
-      link.addEventListener('mouseleave', leave)
-      cleanups.push(() => {
-        link.removeEventListener('mouseenter', enter)
-        link.removeEventListener('mouseleave', leave)
-      })
-    })
-    return () => cleanups.forEach((fn) => fn())
-  }, [])
-
   const isActive = (href) => `#${activeSection}` === href
 
   const handleNavClick = (e, href) => {
@@ -173,6 +155,13 @@ const Header = ({ showBanner = true }) => {
       {showBanner && <AnnouncementBanner />}
 
       <style>{`
+        .hdr-desktop-nav .nav-link {
+          display: inline-block;
+          transition: color 0.2s ease, transform 0.2s ease;
+        }
+        .hdr-desktop-nav .nav-link:hover {
+          transform: translateY(-2px);
+        }
         .hdr-logo {
           font-family: 'Poppins', sans-serif;
           font-size: 1.35rem;
@@ -223,7 +212,6 @@ const Header = ({ showBanner = true }) => {
                 <a
                   key={link.href}
                   href={link.href}
-                  ref={el => navLinksRef.current[i] = el}
                   onClick={(e) => handleNavClick(e, link.href)}
                   className={`nav-link text-text-secondary hover:text-primary transition-colors duration-200 px-3 py-2 rounded-md text-sm font-medium relative ${isActive(link.href) ? 'active' : ''}`}
                 >

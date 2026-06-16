@@ -1,5 +1,7 @@
+import { lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
-import FlowingMenu from '../components/FlowingMenu'
+
+const FlowingMenu = lazy(() => import('../components/FlowingMenu'))
 
 const flowingMenuItems = [
   { link: '#skills', text: 'Frontend Skills', image: 'https://picsum.photos/600/400?random=1' },
@@ -97,15 +99,17 @@ const Skills = () => {
 
       {/* Flowing Skills Menu */}
       <div className="sk-menu-wrap">
-        <FlowingMenu
-          items={flowingMenuItems}
-          speed={15}
-          textColor="#ffffff"
-          bgColor="transparent"
-          marqueeBgColor="black"
-          marqueeTextColor="#060010"
-          borderColor="#ffffff"
-        />
+        <Suspense fallback={null}>
+          <FlowingMenu
+            items={flowingMenuItems}
+            speed={15}
+            textColor="#ffffff"
+            bgColor="transparent"
+            marqueeBgColor="black"
+            marqueeTextColor="#060010"
+            borderColor="#ffffff"
+          />
+        </Suspense>
       </div>
     </section>
   )

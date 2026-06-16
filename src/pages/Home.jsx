@@ -1,19 +1,18 @@
-﻿import { useEffect, useRef, useState } from 'react'
-import { gsap } from 'gsap'
+﻿import { useEffect, useRef, useState, lazy, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import LogoLoop from '../components/LogoLoop'
 import SocialBottomBar from '../components/SocialBottomBar'
-import HorizontalScrollTrack from '../components/HorizontalScrollTrack'
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript, SiNodedotjs, SiGit, SiGithub } from 'react-icons/si'
-
-import heroImage from '../assets/images/herosection.avif'
 import { fetchGitHubRepos } from '../utils/github'
 import { scrollToSection } from '../utils/scrollNav'
 
-import About from './About'
-import Skills from './Skills'
-import Services from './Services'
-import Contact from './Contact'
+const About = lazy(() => import('./About'))
+const Skills = lazy(() => import('./Skills'))
+const Services = lazy(() => import('./Services'))
+const Contact = lazy(() => import('./Contact'))
+const HorizontalScrollTrack = lazy(() => import('../components/HorizontalScrollTrack'))
+
+const HERO_IMAGE = '/herosection.avif'
 
 const PROJECTS_PER_PAGE = 3
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768
@@ -35,68 +34,107 @@ const Home = () => {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  // Fetch GitHub projects on mount (projects panel is inside overflow:hidden horizontal track
-  // so IntersectionObserver is unreliable — fetch eagerly instead)
+  // Defer GitHub fetch until the browser is idle so first paint stays fast
   useEffect(() => {
+    let cancelled = false
+
     const load = async () => {
       try {
-        const repos = await fetchGitHubRepos(30, 'updated')
-        setGithubProjects(repos)
+        const repos = await fetchGitHubRepos(15, 'updated')
+        if (!cancelled) setGithubProjects(repos)
       } catch (err) {
         console.error('Failed to load GitHub projects:', err)
       } finally {
-        setLoadingProjects(false)
+        if (!cancelled) setLoadingProjects(false)
       }
     }
-    load()
+
+    let idleId
+    if (typeof requestIdleCallback !== 'undefined') {
+      idleId = requestIdleCallback(load, { timeout: 3500 })
+    } else {
+      idleId = window.setTimeout(load, 2000)
+    }
+
+    return () => {
+      cancelled = true
+      if (typeof cancelIdleCallback !== 'undefined' && typeof idleId === 'number') {
+        cancelIdleCallback(idleId)
+      } else {
+        clearTimeout(idleId)
+      }
+    }
   }, [])
 
   useEffect(() => {
     const path = signaturePathRef.current
     const svg = signatureSvgRef.current
-    if (!path || !svg || typeof gsap === 'undefined') return
+    if (!path || !svg) return undefined
 
-    const pathLength = path.getTotalLength()
-    path.style.strokeDasharray = `${pathLength}`
-    path.style.strokeDashoffset = `${pathLength}`
+    let cancelled = false
+    let timeline
 
-    const tl = gsap.timeline({ delay: 0.3 })
-    signatureTimelineRef.current = tl
+    const run = async () => {
+      const { gsap } = await import('gsap')
+      if (cancelled || !signaturePathRef.current || !signatureSvgRef.current) return
 
-    tl.to(svg, { opacity: 1, duration: 0.5, ease: 'power2.out' })
-    tl.to(path, {
-      strokeDashoffset: 0,
-      duration: 2.5,
-      ease: 'power1.inOut',
-      onUpdate() {
-        const progress = this.progress()
-        if (progress > 0.2 && progress < 0.6) {
-          path.style.strokeWidth = '3.5'
-        } else if (progress > 0.6 && progress < 0.9) {
-          path.style.strokeWidth = '3.2'
-        } else {
-          path.style.strokeWidth = '3'
-        }
-      },
-      onComplete() {
-        gsap.to(path, {
-          strokeWidth: '3',
-          filter: 'drop-shadow(0 4px 16px rgba(252, 163, 17, 0.8))',
-          duration: 0.5,
-          ease: 'power2.out',
-        })
-        gsap.to(svg, {
-          scale: 1.02,
-          duration: 0.4,
-          yoyo: true,
-          repeat: 1,
-          ease: 'power2.inOut',
-        })
-      },
-    })
+      const pathEl = signaturePathRef.current
+      const svgEl = signatureSvgRef.current
+      const pathLength = pathEl.getTotalLength()
+      pathEl.style.strokeDasharray = `${pathLength}`
+      pathEl.style.strokeDashoffset = `${pathLength}`
+
+      timeline = gsap.timeline({ delay: 0.3 })
+      signatureTimelineRef.current = timeline
+
+      timeline.to(svgEl, { opacity: 1, duration: 0.5, ease: 'power2.out' })
+      timeline.to(pathEl, {
+        strokeDashoffset: 0,
+        duration: 2.5,
+        ease: 'power1.inOut',
+        onUpdate() {
+          const progress = this.progress()
+          if (progress > 0.2 && progress < 0.6) {
+            pathEl.style.strokeWidth = '3.5'
+          } else if (progress > 0.6 && progress < 0.9) {
+            pathEl.style.strokeWidth = '3.2'
+          } else {
+            pathEl.style.strokeWidth = '3'
+          }
+        },
+        onComplete() {
+          gsap.to(pathEl, {
+            strokeWidth: '3',
+            filter: 'drop-shadow(0 4px 16px rgba(252, 163, 17, 0.8))',
+            duration: 0.5,
+            ease: 'power2.out',
+          })
+          gsap.to(svgEl, {
+            scale: 1.02,
+            duration: 0.4,
+            yoyo: true,
+            repeat: 1,
+            ease: 'power2.inOut',
+          })
+        },
+      })
+    }
+
+    let idleId
+    if (typeof requestIdleCallback !== 'undefined') {
+      idleId = requestIdleCallback(run, { timeout: 2500 })
+    } else {
+      idleId = window.setTimeout(run, 800)
+    }
 
     return () => {
-      signatureTimelineRef.current?.kill()
+      cancelled = true
+      if (typeof cancelIdleCallback !== 'undefined' && typeof idleId === 'number') {
+        cancelIdleCallback(idleId)
+      } else {
+        clearTimeout(idleId)
+      }
+      timeline?.kill()
       signatureTimelineRef.current = null
     }
   }, [])
@@ -509,7 +547,7 @@ const Home = () => {
           <div className="hero-bg-portrait">
             <img
               className="hero-bg-image"
-              src={heroImage}
+              src={HERO_IMAGE}
               alt=""
               aria-hidden="true"
               loading="eager"
@@ -638,31 +676,33 @@ const Home = () => {
       </section>
 
       {isDesktop ? (
-        <HorizontalScrollTrack panels={[
-          <About key="about" />,
-          <Skills key="skills" />,
-          <Services key="services" />,
-          <ProjectsPanel
-            key="projects"
-            githubProjects={githubProjects}
-            loadingProjects={loadingProjects}
-            visibleProjectCount={visibleProjectCount}
-            setVisibleProjectCount={setVisibleProjectCount}
-          />,
-          <Contact key="contact" />,
-        ]} />
+        <Suspense fallback={null}>
+          <HorizontalScrollTrack panels={[
+            <Suspense key="about" fallback={null}><About /></Suspense>,
+            <Suspense key="skills" fallback={null}><Skills /></Suspense>,
+            <Suspense key="services" fallback={null}><Services /></Suspense>,
+            <ProjectsPanel
+              key="projects"
+              githubProjects={githubProjects}
+              loadingProjects={loadingProjects}
+              visibleProjectCount={visibleProjectCount}
+              setVisibleProjectCount={setVisibleProjectCount}
+            />,
+            <Suspense key="contact" fallback={null}><Contact /></Suspense>,
+          ]} />
+        </Suspense>
       ) : (
         <>
-          <About />
-          <Skills />
-          <Services />
+          <Suspense fallback={null}><About /></Suspense>
+          <Suspense fallback={null}><Skills /></Suspense>
+          <Suspense fallback={null}><Services /></Suspense>
           <ProjectsPanel
             githubProjects={githubProjects}
             loadingProjects={loadingProjects}
             visibleProjectCount={visibleProjectCount}
             setVisibleProjectCount={setVisibleProjectCount}
           />
-          <Contact />
+          <Suspense fallback={null}><Contact /></Suspense>
         </>
       )}
 
