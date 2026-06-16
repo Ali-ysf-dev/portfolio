@@ -6,7 +6,7 @@ import SocialBottomBar from '../components/SocialBottomBar'
 import HorizontalScrollTrack from '../components/HorizontalScrollTrack'
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript, SiNodedotjs, SiGit, SiGithub } from 'react-icons/si'
 
-import heroImage from '../assets/images/pngversion.png'
+import heroImage from '../assets/images/herosection.avif'
 import { fetchGitHubRepos } from '../utils/github'
 import { scrollToSection } from '../utils/scrollNav'
 
