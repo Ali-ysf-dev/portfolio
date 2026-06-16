@@ -3,6 +3,16 @@ import { useRef, useEffect } from 'react'
 const SECTION_IDS = ['about', 'skills', 'services', 'projects', 'contact']
 const TRANSITIONS = ['horizontal', 'vertical', 'vertical', 'horizontal']
 const HEADER_OFFSET = 64
+const PANEL_READ_BUFFER = 64
+
+const getPanelReadDist = (panel) => {
+  if (!panel) return 0
+  const content = panel.firstElementChild
+  const contentHeight = content
+    ? Math.max(content.scrollHeight, content.offsetHeight)
+    : panel.scrollHeight
+  return Math.max(0, contentHeight - panel.clientHeight + PANEL_READ_BUFFER)
+}
 
 const getStageViewport = () => {
   const vv = window.visualViewport
@@ -48,9 +58,7 @@ const HorizontalScrollTrack = ({ panels }) => {
       const { h: vh, w: vw } = getStageViewport()
       document.documentElement.style.setProperty('--stage-vh', `${vh}px`)
       if (stickyRef.current) stickyRef.current.style.height = `${vh}px`
-      const readDist = panelRefs.current.map((p) =>
-        p ? Math.max(0, p.scrollHeight - p.clientHeight) : 0
-      )
+      const readDist = panelRefs.current.map(getPanelReadDist)
       const transDist = TRANSITIONS.slice(0, n - 1).map((d) =>
         d === 'horizontal' ? vw : vh
       )
@@ -74,12 +82,10 @@ const HorizontalScrollTrack = ({ panels }) => {
             setPanelVisible(el, true)
             el.style.transform = 'none'
             el.style.zIndex = '2'
-            el.style.contentVisibility = 'visible'
           } else {
             setPanelVisible(el, false)
             el.style.transform = 'translate3d(100vw, 0, 0)'
             el.style.zIndex = '0'
-            el.style.contentVisibility = 'hidden'
           }
         })
         window.__horizontalActiveSection = SECTION_IDS[0]
@@ -146,7 +152,6 @@ const HorizontalScrollTrack = ({ panels }) => {
         const transform = `translate3d(${x}px, ${y}px, 0)`
         const opacity = visible ? '1' : '0'
         const zIndex = visible ? (j === active || j === active + 1 ? '2' : '1') : '0'
-        const contentVisibility = visible ? 'visible' : 'hidden'
 
         const prev = panelStateRef.current[j]
         if (
@@ -165,7 +170,6 @@ const HorizontalScrollTrack = ({ panels }) => {
         el.style.opacity = opacity
         el.style.pointerEvents = visible ? 'auto' : 'none'
         el.style.zIndex = zIndex
-        el.style.contentVisibility = contentVisibility
         el.setAttribute('aria-hidden', visible ? 'false' : 'true')
       })
 
@@ -226,6 +230,7 @@ const HorizontalScrollTrack = ({ panels }) => {
     const ro = new ResizeObserver(onResize)
     panelRefs.current.forEach((p) => {
       if (p) ro.observe(p)
+      if (p?.firstElementChild) ro.observe(p.firstElementChild)
     })
 
     return () => {
