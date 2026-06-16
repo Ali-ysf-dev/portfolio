@@ -37,27 +37,44 @@ const Header = ({ showBanner = true }) => {
       const useStageNav = trackEl && !isSmallScreen()
 
       if (useStageNav) {
+        let scrollRaf = 0
+        let lastScrolled = window.scrollY > 32
+        let lastActive = 'home'
+
         const onScroll = () => {
-          setScrolled(window.scrollY > 32)
+          if (scrollRaf) return
+          scrollRaf = requestAnimationFrame(() => {
+            scrollRaf = 0
+            const nextScrolled = window.scrollY > 32
+            if (nextScrolled !== lastScrolled) {
+              lastScrolled = nextScrolled
+              setScrolled(nextScrolled)
+            }
 
-          const offset = 80
-          const trackTop = trackEl.offsetTop
-          const trackScrollable = trackEl.offsetHeight - window.innerHeight
+            const offset = 80
+            const trackTop = trackEl.offsetTop
+            const trackScrollable = trackEl.offsetHeight - window.innerHeight
+            let nextActive = 'home'
 
-          if (window.scrollY >= trackTop - offset && window.scrollY < trackTop + trackScrollable) {
-            setActiveSection(window.__horizontalActiveSection || 'about')
-            return
-          }
-          if (window.scrollY >= trackTop + trackScrollable) {
-            setActiveSection('contact')
-            return
-          }
-          setActiveSection('home')
+            if (window.scrollY >= trackTop - offset && window.scrollY < trackTop + trackScrollable) {
+              nextActive = window.__horizontalActiveSection || 'about'
+            } else if (window.scrollY >= trackTop + trackScrollable) {
+              nextActive = 'contact'
+            }
+
+            if (nextActive !== lastActive) {
+              lastActive = nextActive
+              setActiveSection(nextActive)
+            }
+          })
         }
 
         window.addEventListener('scroll', onScroll, { passive: true })
         onScroll()
-        cleanup = () => window.removeEventListener('scroll', onScroll)
+        cleanup = () => {
+          if (scrollRaf) cancelAnimationFrame(scrollRaf)
+          window.removeEventListener('scroll', onScroll)
+        }
         return
       }
 
@@ -79,14 +96,26 @@ const Header = ({ showBanner = true }) => {
         if (el) observer.observe(el)
       })
 
+      let scrollRaf = 0
+      let lastScrolled = window.scrollY > 32
+
       const onScroll = () => {
-        setScrolled(window.scrollY > 32)
-        if (window.scrollY < 180) setActiveSection('home')
+        if (scrollRaf) return
+        scrollRaf = requestAnimationFrame(() => {
+          scrollRaf = 0
+          const nextScrolled = window.scrollY > 32
+          if (nextScrolled !== lastScrolled) {
+            lastScrolled = nextScrolled
+            setScrolled(nextScrolled)
+          }
+          if (window.scrollY < 180) setActiveSection('home')
+        })
       }
 
       window.addEventListener('scroll', onScroll, { passive: true })
       onScroll()
       cleanup = () => {
+        if (scrollRaf) cancelAnimationFrame(scrollRaf)
         observer.disconnect()
         window.removeEventListener('scroll', onScroll)
       }
@@ -108,15 +137,19 @@ const Header = ({ showBanner = true }) => {
   }, [mobileMenuOpen])
 
   useEffect(() => {
-    if (typeof gsap !== 'undefined') {
-      navLinksRef.current.forEach(link => {
-        if (!link) return
-        const enter = () => gsap.to(link, { y: -2, duration: 0.2, ease: 'power2.out' })
-        const leave = () => gsap.to(link, { y: 0,  duration: 0.2, ease: 'power2.out' })
-        link.addEventListener('mouseenter', enter)
-        link.addEventListener('mouseleave', leave)
+    const cleanups = []
+    navLinksRef.current.forEach((link) => {
+      if (!link) return
+      const enter = () => gsap.to(link, { y: -2, duration: 0.2, ease: 'power2.out' })
+      const leave = () => gsap.to(link, { y: 0, duration: 0.2, ease: 'power2.out' })
+      link.addEventListener('mouseenter', enter)
+      link.addEventListener('mouseleave', leave)
+      cleanups.push(() => {
+        link.removeEventListener('mouseenter', enter)
+        link.removeEventListener('mouseleave', leave)
       })
-    }
+    })
+    return () => cleanups.forEach((fn) => fn())
   }, [])
 
   const isActive = (href) => `#${activeSection}` === href

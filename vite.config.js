@@ -74,7 +74,6 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash][extname]',
         manualChunks: {
           'vendor-react':  ['react', 'react-dom', 'react-router-dom'],
-          'vendor-three':  ['three'],
           'vendor-gsap':   ['gsap'],
           'vendor-motion': ['framer-motion'],
         },
@@ -82,7 +81,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['three', 'gsap', 'framer-motion'],
+    include: ['gsap', 'framer-motion'],
   },
   assetsInclude: ['**/*.avif', '**/*.AVIF', '**/*.PNG', '**/*.png', '**/*.JPG', '**/*.jpg', '**/*.JPEG', '**/*.jpeg', '**/*.otf', '**/*.ttf', '**/*.woff', '**/*.woff2'],
 })

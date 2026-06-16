@@ -12,8 +12,23 @@ function FlowingMenu({
   marqueeTextColor = '#060010',
   borderColor = '#fff'
 }) {
+  const wrapRef = useRef(null)
+  const [isVisible, setIsVisible] = useState(true)
+
+  useEffect(() => {
+    const node = wrapRef.current
+    if (!node) return undefined
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.01 }
+    )
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div className="menu-wrap" style={{ backgroundColor: bgColor }}>
+    <div ref={wrapRef} className="menu-wrap" style={{ backgroundColor: bgColor }}>
       <nav className="menu">
         {items.map((item, idx) => (
           <MenuItem
@@ -24,6 +39,7 @@ function FlowingMenu({
             marqueeBgColor={marqueeBgColor}
             marqueeTextColor={marqueeTextColor}
             borderColor={borderColor}
+            isVisible={isVisible}
           />
         ))}
       </nav>
@@ -76,7 +92,8 @@ function MenuItem({
   textColor,
   marqueeBgColor,
   marqueeTextColor,
-  borderColor
+  borderColor,
+  isVisible = true,
 }) {
   const itemRef = useRef(null)
   const marqueeRef = useRef(null)
@@ -120,6 +137,11 @@ function MenuItem({
   }, [text, image])
 
   useEffect(() => {
+    if (!isVisible) {
+      animationRef.current?.pause()
+      return undefined
+    }
+
     const setupMarquee = () => {
       if (!marqueeInnerRef.current) return
 
@@ -147,9 +169,10 @@ function MenuItem({
       clearTimeout(timer)
       if (animationRef.current) {
         animationRef.current.kill()
+        animationRef.current = null
       }
     }
-  }, [text, image, repetitions, speed])
+  }, [text, image, repetitions, speed, isVisible])
 
   const handleMouseEnter = ev => {
     if (!itemRef.current || !marqueeRef.current || !marqueeInnerRef.current) return

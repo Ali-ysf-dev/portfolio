@@ -6,7 +6,7 @@ import SocialBottomBar from '../components/SocialBottomBar'
 import HorizontalScrollTrack from '../components/HorizontalScrollTrack'
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript, SiNodedotjs, SiGit, SiGithub } from 'react-icons/si'
 
-import heroImage from '../assets/images/newport.avif'
+import heroImage from '../assets/images/pngversion.png'
 import { fetchGitHubRepos } from '../utils/github'
 import { scrollToSection } from '../utils/scrollNav'
 
@@ -21,8 +21,7 @@ const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768
 const Home = () => {
   const signaturePathRef = useRef(null)
   const signatureSvgRef = useRef(null)
-  const heroTitleRef = useRef(null)
-  const fadeInRefs = useRef([])
+  const signatureTimelineRef = useRef(null)
 
   const [isDesktop, setIsDesktop] = useState(() => !isMobile())
   const [githubProjects, setGithubProjects] = useState([])
@@ -53,133 +52,53 @@ const Home = () => {
   }, [])
 
   useEffect(() => {
-    const setupAnimations = () => {
-      if (typeof gsap !== 'undefined') {
-        // Hero Signature Animation
-        if (signaturePathRef.current && signatureSvgRef.current) {
-          const pathLength = signaturePathRef.current.getTotalLength()
-          signaturePathRef.current.style.strokeDasharray = pathLength
-          signaturePathRef.current.style.strokeDashoffset = pathLength
+    const path = signaturePathRef.current
+    const svg = signatureSvgRef.current
+    if (!path || !svg || typeof gsap === 'undefined') return
 
-          const tl = gsap.timeline({ delay: 0.3 })
-          tl.to(signatureSvgRef.current, { opacity: 1, duration: 0.5, ease: 'power2.out' })
-          tl.to(signaturePathRef.current, {
-            strokeDashoffset: 0,
-            duration: 2.5,
-            ease: 'power1.inOut',
-            onUpdate: function () {
-              const progress = this.progress()
-              if (progress > 0.2 && progress < 0.6) {
-                signaturePathRef.current.style.strokeWidth = '3.5'
-              } else if (progress > 0.6 && progress < 0.9) {
-                signaturePathRef.current.style.strokeWidth = '3.2'
-              } else {
-                signaturePathRef.current.style.strokeWidth = '3'
-              }
-            },
-            onComplete: function () {
-              gsap.to(signaturePathRef.current, {
-                strokeWidth: '3',
-                filter: 'drop-shadow(0 4px 16px rgba(252, 163, 17, 0.8))',
-                duration: 0.5,
-                ease: 'power2.out'
-              })
-              gsap.to(signatureSvgRef.current, {
-                scale: 1.02,
-                duration: 0.4,
-                yoyo: true,
-                repeat: 1,
-                ease: 'power2.inOut'
-              })
-            }
-          })
+    const pathLength = path.getTotalLength()
+    path.style.strokeDasharray = `${pathLength}`
+    path.style.strokeDashoffset = `${pathLength}`
+
+    const tl = gsap.timeline({ delay: 0.3 })
+    signatureTimelineRef.current = tl
+
+    tl.to(svg, { opacity: 1, duration: 0.5, ease: 'power2.out' })
+    tl.to(path, {
+      strokeDashoffset: 0,
+      duration: 2.5,
+      ease: 'power1.inOut',
+      onUpdate() {
+        const progress = this.progress()
+        if (progress > 0.2 && progress < 0.6) {
+          path.style.strokeWidth = '3.5'
+        } else if (progress > 0.6 && progress < 0.9) {
+          path.style.strokeWidth = '3.2'
+        } else {
+          path.style.strokeWidth = '3'
         }
-
-        // Fade-in elements
-        const fadeObserver = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting && !entry.target.classList.contains('visible')) {
-              const index = fadeInRefs.current.indexOf(entry.target)
-              gsap.to(entry.target, {
-                opacity: 1,
-                y: 0,
-                duration: 0.8,
-                delay: 0.3 + (index * 0.05),
-                ease: 'power2.out',
-                onComplete: function () { entry.target.classList.add('visible') }
-              })
-              fadeObserver.unobserve(entry.target)
-            }
-          })
-        }, { threshold: 0.1 })
-
-        const validFadeElements = fadeInRefs.current.filter(el => el !== null && el !== undefined)
-        validFadeElements.forEach((el) => {
-          gsap.set(el, { opacity: 0, y: 30 })
-          fadeObserver.observe(el)
+      },
+      onComplete() {
+        gsap.to(path, {
+          strokeWidth: '3',
+          filter: 'drop-shadow(0 4px 16px rgba(252, 163, 17, 0.8))',
+          duration: 0.5,
+          ease: 'power2.out',
         })
-
-        // Hero text animation
-        if (heroTitleRef.current && !heroTitleRef.current.classList.contains('text-animated')) {
-          const text = heroTitleRef.current.textContent
-          heroTitleRef.current.innerHTML = text.split('').map((char) =>
-            `<span style="display: inline-block;">${char === ' ' ? '&nbsp;' : char}</span>`
-          ).join('')
-
-          const chars = heroTitleRef.current.querySelectorAll('span')
-          chars.forEach(char => {
-            char.style.opacity = '1'
-            char.style.transform = 'translateY(0) rotateX(0deg)'
-          })
-
-          gsap.fromTo(chars,
-            { opacity: 0, y: 50, rotationX: -90 },
-            {
-              opacity: 1, y: 0, rotationX: 0,
-              duration: 0.8, stagger: 0.03, ease: 'back.out(1.7)', delay: 0.3,
-              onComplete: function () { heroTitleRef.current.classList.add('text-animated') }
-            }
-          )
-        }
-
-        // Button hover effects
-        const buttons = document.querySelectorAll('.btn-primary, .btn-secondary')
-        buttons.forEach(button => {
-          button.addEventListener('mouseenter', () => gsap.to(button, { scale: 1.05, y: -2, duration: 0.2, ease: 'power2.out' }))
-          button.addEventListener('mouseleave', () => gsap.to(button, { scale: 1, y: 0, duration: 0.2, ease: 'power2.out' }))
+        gsap.to(svg, {
+          scale: 1.02,
+          duration: 0.4,
+          yoyo: true,
+          repeat: 1,
+          ease: 'power2.inOut',
         })
+      },
+    })
 
-        // Card animations
-        const allCards = document.querySelectorAll('.card')
-        const cardObserver = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting && !entry.target.classList.contains('gsap-animated')) {
-              gsap.fromTo(entry.target,
-                { opacity: 0, y: 30 },
-                {
-                  opacity: 1, y: 0, duration: 0.6, ease: 'power2.out',
-                  onComplete: function () { entry.target.classList.add('gsap-animated') }
-                }
-              )
-              cardObserver.unobserve(entry.target)
-            }
-          })
-        }, { threshold: 0.1 })
-
-        allCards.forEach(card => {
-          if (card) {
-            gsap.set(card, { opacity: 0, y: 30 })
-            if (!card.classList.contains('certificate-card')) {
-              card.addEventListener('mouseenter', () => gsap.to(card, { y: -4, scale: 1.02, duration: 0.2, ease: 'power2.out' }))
-              card.addEventListener('mouseleave', () => gsap.to(card, { y: 0, scale: 1, duration: 0.2, ease: 'power2.out' }))
-            }
-            cardObserver.observe(card)
-          }
-        })
-      }
+    return () => {
+      signatureTimelineRef.current?.kill()
+      signatureTimelineRef.current = null
     }
-
-    requestAnimationFrame(() => { requestAnimationFrame(setupAnimations) })
   }, [])
 
   return (
@@ -407,13 +326,14 @@ const Home = () => {
           width: 100%;
           height: 100%;
           background-color: #000000;
+          overflow: hidden;
         }
         .hero-bg-image {
           position: absolute;
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: contain;
+          object-fit: cover;
           object-position: center bottom;
           display: block;
         }
@@ -621,7 +541,7 @@ const Home = () => {
                 transition={{ duration: 0.6, delay: 0.42 }}
               >
                 Hi, I'm{' '}
-                <span className="text-gradient" ref={heroTitleRef}>Ali Youssef</span>
+                <span className="text-gradient">Ali Youssef</span>
               </motion.h1>
 
               <motion.p
@@ -710,6 +630,7 @@ const Home = () => {
             scaleOnHover
             fadeOut
             fadeOutColor="#000000"
+            pauseWhenOffscreen
             ariaLabel="Technology stack"
             className="text-text-primary"
           />
@@ -727,7 +648,6 @@ const Home = () => {
             loadingProjects={loadingProjects}
             visibleProjectCount={visibleProjectCount}
             setVisibleProjectCount={setVisibleProjectCount}
-            fadeInRefs={fadeInRefs}
           />,
           <Contact key="contact" />,
         ]} />
@@ -741,7 +661,6 @@ const Home = () => {
             loadingProjects={loadingProjects}
             visibleProjectCount={visibleProjectCount}
             setVisibleProjectCount={setVisibleProjectCount}
-            fadeInRefs={fadeInRefs}
           />
           <Contact />
         </>
@@ -753,7 +672,7 @@ const Home = () => {
 }
 
 // Projects as a standalone panel component (used inside HorizontalScrollTrack)
-function ProjectsPanel({ githubProjects, loadingProjects, visibleProjectCount, setVisibleProjectCount, fadeInRefs }) {
+function ProjectsPanel({ githubProjects, loadingProjects, visibleProjectCount, setVisibleProjectCount }) {
   return (
       <section id="projects" className="py-12 sm:py-14 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
         {/* Background orbs */}
@@ -770,19 +689,23 @@ function ProjectsPanel({ githubProjects, loadingProjects, visibleProjectCount, s
             >
               Portfolio
             </motion.span>
-            <h3
-              className="section-header-title text-text-primary fade-in"
-              ref={el => { if (el && !fadeInRefs.current.includes(el)) fadeInRefs.current.push(el) }}
+            <motion.h3
+              className="section-header-title text-text-primary"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.05 }}
             >
               Featured Projects
-            </h3>
+            </motion.h3>
             <div className="section-header-line" />
-            <p
-              className="section-header-desc text-text-secondary fade-in"
-              ref={el => { if (el && !fadeInRefs.current.includes(el)) fadeInRefs.current.push(el) }}
+            <motion.p
+              className="section-header-desc text-text-secondary"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.12 }}
             >
               A selection of work I'm proud of — from UI-driven apps to full-stack solutions.
-            </p>
+            </motion.p>
           </div>
 
           {loadingProjects ? (
