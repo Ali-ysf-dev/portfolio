@@ -1,16 +1,16 @@
-﻿import { useEffect, useRef, useState, lazy, Suspense } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import LogoLoop from '../components/LogoLoop'
 import SocialBottomBar from '../components/SocialBottomBar'
+import HorizontalScrollTrack from '../components/HorizontalScrollTrack'
 import { SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiJavascript, SiNodedotjs, SiGit, SiGithub } from 'react-icons/si'
 import { fetchGitHubRepos } from '../utils/github'
 import { scrollToSection } from '../utils/scrollNav'
 
-const About = lazy(() => import('./About'))
-const Skills = lazy(() => import('./Skills'))
-const Services = lazy(() => import('./Services'))
-const Contact = lazy(() => import('./Contact'))
-const HorizontalScrollTrack = lazy(() => import('../components/HorizontalScrollTrack'))
+import About from './About'
+import Skills from './Skills'
+import Services from './Services'
+import Contact from './Contact'
 
 const HERO_IMAGE = '/herosection.avif'
 
@@ -34,7 +34,7 @@ const Home = () => {
     return () => window.removeEventListener('resize', onResize)
   }, [])
 
-  // Defer GitHub fetch until the browser is idle so first paint stays fast
+  // Fetch projects after first paint without blocking page render
   useEffect(() => {
     let cancelled = false
 
@@ -49,20 +49,10 @@ const Home = () => {
       }
     }
 
-    let idleId
-    if (typeof requestIdleCallback !== 'undefined') {
-      idleId = requestIdleCallback(load, { timeout: 3500 })
-    } else {
-      idleId = window.setTimeout(load, 2000)
-    }
-
+    const timer = window.setTimeout(load, 300)
     return () => {
       cancelled = true
-      if (typeof cancelIdleCallback !== 'undefined' && typeof idleId === 'number') {
-        cancelIdleCallback(idleId)
-      } else {
-        clearTimeout(idleId)
-      }
+      clearTimeout(timer)
     }
   }, [])
 
@@ -120,20 +110,11 @@ const Home = () => {
       })
     }
 
-    let idleId
-    if (typeof requestIdleCallback !== 'undefined') {
-      idleId = requestIdleCallback(run, { timeout: 2500 })
-    } else {
-      idleId = window.setTimeout(run, 800)
-    }
+    const idleId = window.setTimeout(run, 400)
 
     return () => {
       cancelled = true
-      if (typeof cancelIdleCallback !== 'undefined' && typeof idleId === 'number') {
-        cancelIdleCallback(idleId)
-      } else {
-        clearTimeout(idleId)
-      }
+      clearTimeout(idleId)
       timeline?.kill()
       signatureTimelineRef.current = null
     }
@@ -561,60 +542,36 @@ const Home = () => {
         <div className="hero-inner flex-1 flex flex-col">
           <div className="hero-content-grid">
             <div className="hero-content-left">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
+              <div>
                 <p className="hero-eyebrow">
                   <span className="hero-eyebrow-dot" />
                   Available for work
                 </p>
-              </motion.div>
+              </div>
 
-              <motion.h1
-                className="hero-title"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.42 }}
-              >
+              <h1 className="hero-title">
                 Hi, I'm{' '}
                 <span className="text-gradient">Ali Youssef</span>
-              </motion.h1>
+              </h1>
 
-              <motion.p
-                className="hero-subtitle"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.54 }}
-              >
+              <p className="hero-subtitle">
                 Frontend Developer
-              </motion.p>
+              </p>
             </div>
 
             <div className="hero-content-center" aria-hidden="true" />
 
             <div className="hero-content-right">
-              <motion.div
-                className="hero-desc-card"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.66 }}
-              >
+              <div className="hero-desc-card">
                 <p className="hero-desc">
                   Highly motivated and experienced Front-end Developer seeking to build scalable and fast web applications, combined with AI tools like Vibe Coding to enhance user experience.
                 </p>
-              </motion.div>
+              </div>
             </div>
           </div>
 
           {/* Bottom-center: signature + CTA */}
-          <motion.div
-            className="hero-bottom"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.9 }}
-          >
+          <div className="hero-bottom">
             <div className="signature-wrapper hero-bottom-sig" id="signature-wrapper">
               <svg ref={signatureSvgRef} id="signature-svg" className="signature-svg signature-hero" viewBox="0 0 1066 481" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -644,7 +601,7 @@ const Home = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
             </a>
-          </motion.div>
+          </div>
         </div>
 
         {/* Tech Stack Logo Loop */}
@@ -676,33 +633,31 @@ const Home = () => {
       </section>
 
       {isDesktop ? (
-        <Suspense fallback={null}>
-          <HorizontalScrollTrack panels={[
-            <Suspense key="about" fallback={null}><About /></Suspense>,
-            <Suspense key="skills" fallback={null}><Skills /></Suspense>,
-            <Suspense key="services" fallback={null}><Services /></Suspense>,
-            <ProjectsPanel
-              key="projects"
-              githubProjects={githubProjects}
-              loadingProjects={loadingProjects}
-              visibleProjectCount={visibleProjectCount}
-              setVisibleProjectCount={setVisibleProjectCount}
-            />,
-            <Suspense key="contact" fallback={null}><Contact /></Suspense>,
-          ]} />
-        </Suspense>
+        <HorizontalScrollTrack panels={[
+          <About key="about" />,
+          <Skills key="skills" />,
+          <Services key="services" />,
+          <ProjectsPanel
+            key="projects"
+            githubProjects={githubProjects}
+            loadingProjects={loadingProjects}
+            visibleProjectCount={visibleProjectCount}
+            setVisibleProjectCount={setVisibleProjectCount}
+          />,
+          <Contact key="contact" />,
+        ]} />
       ) : (
         <>
-          <Suspense fallback={null}><About /></Suspense>
-          <Suspense fallback={null}><Skills /></Suspense>
-          <Suspense fallback={null}><Services /></Suspense>
+          <About />
+          <Skills />
+          <Services />
           <ProjectsPanel
             githubProjects={githubProjects}
             loadingProjects={loadingProjects}
             visibleProjectCount={visibleProjectCount}
             setVisibleProjectCount={setVisibleProjectCount}
           />
-          <Suspense fallback={null}><Contact /></Suspense>
+          <Contact />
         </>
       )}
 

@@ -1,10 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { Suspense, lazy } from 'react'
 import Header from './components/Header'
+import Footer from './components/Footer'
 import PageBackground from './components/PageBackground'
-
-const Home = lazy(() => import('./pages/Home'))
-const Footer = lazy(() => import('./components/Footer'))
+import Home from './pages/Home'
 
 function App() {
   return (
@@ -17,15 +15,11 @@ function App() {
       <div className="font-sans antialiased">
         <PageBackground />
         <Header />
-        <Suspense fallback={<div style={{ minHeight: '100vh' }} aria-hidden="true" />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="*" element={<Home />} />
-          </Routes>
-        </Suspense>
-        <Suspense fallback={null}>
-          <Footer />
-        </Suspense>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="*" element={<Home />} />
+        </Routes>
+        <Footer />
       </div>
     </Router>
   )
