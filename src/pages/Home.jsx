@@ -497,14 +497,14 @@ const Home = () => {
           font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em;
           text-transform: uppercase; padding: 0.15rem 0.45rem;
           border-radius: 999px; background: rgba(252,163,17,0.9); color: #000;
-          z-index: 10; backdrop-filter: blur(8px);
+          z-index: 10;
         }
         .project-stars-badge {
           position: absolute; top: 6px; right: 6px;
           display: inline-flex; align-items: center; gap: 0.2rem;
           font-size: 0.58rem; font-weight: 600; padding: 0.15rem 0.4rem;
-          border-radius: 999px; background: rgba(0,0,0,0.6); color: #FCA311;
-          border: 1px solid rgba(252,163,17,0.3); z-index: 10; backdrop-filter: blur(8px);
+          border-radius: 999px; background: rgba(0,0,0,0.75); color: #FCA311;
+          border: 1px solid rgba(252,163,17,0.3); z-index: 10;
         }
         .projects-grid-wrap { width: 100%; max-width: 56rem; margin-left: auto; margin-right: auto; }
         .projects-grid {
@@ -670,16 +670,14 @@ const Home = () => {
 function ProjectsPanel({ githubProjects, loadingProjects, visibleProjectCount, setVisibleProjectCount }) {
   return (
       <section id="projects" className="py-12 sm:py-14 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Background orbs */}
-        <div style={{ position: 'absolute', width: 500, height: 500, borderRadius: '50%', background: 'rgba(252,163,17,0.03)', filter: 'blur(100px)', top: '20%', left: '-10%', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'rgba(252,163,17,0.03)', filter: 'blur(100px)', bottom: '10%', right: '-8%', pointerEvents: 'none' }} />
 
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="section-header">
             <motion.span
               className="section-header-eyebrow"
               initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.5 }}
             >
               Portfolio
@@ -687,7 +685,8 @@ function ProjectsPanel({ githubProjects, loadingProjects, visibleProjectCount, s
             <motion.h3
               className="section-header-title text-text-primary"
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.05 }}
             >
               Featured Projects
@@ -696,7 +695,8 @@ function ProjectsPanel({ githubProjects, loadingProjects, visibleProjectCount, s
             <motion.p
               className="section-header-desc text-text-secondary"
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.12 }}
             >
               A selection of work I'm proud of — from UI-driven apps to full-stack solutions.
@@ -721,8 +721,9 @@ function ProjectsPanel({ githubProjects, loadingProjects, visibleProjectCount, s
                       key={project.id}
                       className="project-card-modern"
                       initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: idx * 0.1 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.4, delay: Math.min(idx, 2) * 0.08 }}
                     >
                       <div className="project-img-outer">
                         <div className="project-img-wrap">

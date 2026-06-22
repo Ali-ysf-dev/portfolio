@@ -28,6 +28,12 @@
   will-change: transform;
 }
 
+@media (max-width: 1023px) {
+  .page-bg-spotlight {
+    display: none;
+  }
+}
+
 .page-bg-dots {
   position: absolute;
   inset: 0;
@@ -40,7 +46,7 @@
 .page-bg-blob {
   position: absolute;
   border-radius: 50%;
-  filter: blur(130px);
+  filter: blur(100px);
   will-change: transform, opacity;
 }
 
@@ -78,6 +84,22 @@
   animation: pageBgBreatheSide 16s ease-in-out infinite 1s;
 }
 
+@media (max-width: 1023px) {
+  .page-bg-blob {
+    filter: blur(50px);
+    will-change: auto;
+    animation: none !important;
+  }
+  .page-bg-blob-2,
+  .page-bg-blob-3 {
+    display: none;
+  }
+  .page-bg-blob-1 {
+    opacity: 0.5;
+    transform: translateX(-50%) !important;
+  }
+}
+
 .page-bg-vignette {
   position: absolute;
   inset: 0;
@@ -102,6 +124,12 @@
   .page-bg-spotlight,
   .page-bg-blob {
     animation: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .page-bg-dots {
+    display: none;
   }
 }
 

@@ -76,9 +76,9 @@ const useAnimationLoop = (trackRef, targetVelocity, seqWidth, seqHeight, isHover
       track.style.transform = transformValue;
     }
 
-    const animate = timestamp => {
+      const animate = timestamp => {
       if (isPaused) {
-        rafRef.current = requestAnimationFrame(animate)
+        rafRef.current = null
         return
       }
 

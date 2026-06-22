@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
 import { motion } from 'framer-motion'
 
 const SIGNATURE_PATH =
@@ -47,48 +46,59 @@ const About = () => {
     const svg = signatureSvgRef.current
     if (!path || !svg) return
 
-    const pathLength = path.getTotalLength()
-    path.style.strokeDasharray = `${pathLength}`
-    path.style.strokeDashoffset = `${pathLength}`
-    gsap.set(svg, { opacity: 0 })
-
     let tl
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          observer.disconnect()
-          tl = gsap.timeline({ delay: 0.2 })
-          tl.to(svg, { opacity: 0.5, duration: 0.5, ease: 'power2.out' })
-          tl.to(path, {
-            strokeDashoffset: 0,
-            duration: 2.5,
-            ease: 'power1.inOut',
-            onUpdate() {
-              const progress = this.progress()
-              if (progress > 0.2 && progress < 0.6) {
-                path.style.strokeWidth = '3.5'
-              } else if (progress > 0.6 && progress < 0.9) {
-                path.style.strokeWidth = '3.2'
-              } else {
-                path.style.strokeWidth = '3'
-              }
-            },
-            onComplete() {
-              gsap.to(path, {
-                strokeWidth: '3',
-                filter: 'drop-shadow(0 4px 16px rgba(252, 163, 17, 0.3))',
-                duration: 0.5,
-                ease: 'power2.out',
-              })
-            },
-          })
-        }
-      },
-      { threshold: 0.1 }
-    )
-    observer.observe(svg)
+    let observer
 
-    return () => { observer.disconnect(); tl?.kill() }
+    const initAnimation = async () => {
+      const { gsap } = await import('gsap')
+      if (!signaturePathRef.current || !signatureSvgRef.current) return
+
+      const pathEl = signaturePathRef.current
+      const svgEl = signatureSvgRef.current
+      const pathLength = pathEl.getTotalLength()
+      pathEl.style.strokeDasharray = `${pathLength}`
+      pathEl.style.strokeDashoffset = `${pathLength}`
+      gsap.set(svgEl, { opacity: 0 })
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            observer.disconnect()
+            tl = gsap.timeline({ delay: 0.2 })
+            tl.to(svgEl, { opacity: 0.5, duration: 0.5, ease: 'power2.out' })
+            tl.to(pathEl, {
+              strokeDashoffset: 0,
+              duration: 2.5,
+              ease: 'power1.inOut',
+              onUpdate() {
+                const progress = this.progress()
+                if (progress > 0.2 && progress < 0.6) {
+                  pathEl.style.strokeWidth = '3.5'
+                } else if (progress > 0.6 && progress < 0.9) {
+                  pathEl.style.strokeWidth = '3.2'
+                } else {
+                  pathEl.style.strokeWidth = '3'
+                }
+              },
+              onComplete() {
+                gsap.to(pathEl, {
+                  strokeWidth: '3',
+                  filter: 'drop-shadow(0 4px 16px rgba(252, 163, 17, 0.3))',
+                  duration: 0.5,
+                  ease: 'power2.out',
+                })
+              },
+            })
+          }
+        },
+        { threshold: 0.1 }
+      )
+      observer.observe(svgEl)
+    }
+
+    initAnimation()
+
+    return () => { observer?.disconnect(); tl?.kill() }
   }, [])
 
   return (
@@ -324,11 +334,11 @@ const About = () => {
         </div>
 
             <div className="ab-hero-content">
-              <motion.span className="ab-eyebrow" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
+              <motion.span className="ab-eyebrow" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.45 }}>
                 <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/></svg>
                 The Developer
               </motion.span>
-              <motion.h1 className="ab-title" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }}>
+              <motion.h1 className="ab-title" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.08 }}>
                 About <span>Me</span>
               </motion.h1>
             </div>
@@ -337,7 +347,7 @@ const About = () => {
 
         <div className="ab-grid">
           {/* ── Main column ── */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.18 }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.18 }}>
 
             {/* Intro */}
             <div className="ab-intro-card">
@@ -353,7 +363,7 @@ const About = () => {
             {/* Stats */}
             <div className="ab-stats">
               {STATS.map((s, i) => (
-                <motion.div key={s.label} className="ab-stat" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.25 + i * 0.06 }}>
+                <motion.div key={s.label} className="ab-stat" initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35, delay: i * 0.06 }}>
                   <div className="ab-stat-val">{s.value}</div>
                   <div className="ab-stat-label">{s.label}</div>
                 </motion.div>
@@ -375,7 +385,8 @@ const About = () => {
                     key={i}
                     className="ab-tl-entry"
                     initial={{ opacity: 0, x: -16 }}
-                    animate={{ opacity: 1, x: 0 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: i * 0.12 }}
                   >
                     {/* Node */}
@@ -421,7 +432,7 @@ const About = () => {
           </motion.div>
 
           {/* ── Sidebar ── */}
-          <motion.div className="ab-sidebar" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.28 }}>
+          <motion.div className="ab-sidebar" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.15 }}>
 
             {/* Contact */}
             <div className="ab-side-card">
